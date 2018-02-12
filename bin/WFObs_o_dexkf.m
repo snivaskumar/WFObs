@@ -91,7 +91,7 @@ RR      = strucObs.R_k*eye(lop,lop);
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 % Distributed Information Filter
 tic
-type = 3;       % CI = 0,1; EI = 2; ICI = 3
+type = 0;       % CI = 0,1; EI = 2; ICI = 3
 [xkk Pkk]   = subsystem( Fk,Bk,Ck,Dk, y,xkk1,xk1k1,Sk1k1, QQ,RR, type );
 toc
 
