@@ -29,8 +29,19 @@ strucObs.measFlow    = true;   % Use flow measurements (LIDAR) in estimates
 strucObs.sensorsPath = 'sensors_2turb_alm'; % measurement setup filename (see '/setup_sensors/sensors_layouts')
         
 % Kalman filter settings
-strucObs.filtertype = 'enkf'; % Observer types are outlined next
+strucObs.filtertype = 'dexkf'; % Observer types are outlined next
 switch lower(strucObs.filtertype)
+    % Distributed Extended Kalman filter (ExKF)
+    case {'dexkf'}
+        % Covariances
+        strucObs.R_k = 1.0; % Measurement   covariance matrix
+        strucObs.Q_k = 1.0; % Process noise covariance matrix
+        strucObs.P_0 = 0.5; % Initial state covariance matrix
+
+        % Other model settings
+        scriptOptions.exportPressures = false; % Model/predict/filter pressure terms
+        scriptOptions.Linearversion   = true;  % Calculate linearized system matrices: necessary for ExKF
+    
     
     % Extended Kalman filter (ExKF)
     case {'exkf'}
