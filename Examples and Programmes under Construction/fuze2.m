@@ -32,6 +32,11 @@ X_b = T_tmp{2}*Z2*T_tmp{2}';
 % x_a(ia{1}) = x_b(ia{1});
 % x_b(ia{2}) = x_a(ia{2});
 % 
+% x1(ia{1}) = x2(ia{1});
+% x2(ia{2}) = x1(ia{2});
+% x1;
+% x2;
+% 
 % X_a(ia{1},ia{1}) = X_b(ia{1},ia{1});
 % X_b(ia{2},ia{2}) = X_a(ia{2},ia{2});
 %%%%%%
@@ -86,6 +91,3 @@ elseif type == 3
 end
 xf  = x_tmp;
 end
-
-% Pt1t1   = pinv(Zf);
-% xt1t1   = Pt1t1*zf;

@@ -2,8 +2,8 @@ clear all
 close all
 clc
 
-load('model');
-L = 6;
+load('model.mat');
+L = 2;
 for i = 1:6
     for j = 1:6
         if abs(i-j) <= L
@@ -18,7 +18,12 @@ C = [1,1,1,0,0,0;
      1,0,0,1,0,0;
      0,0,0,1,1,0;
      0,1,1,0,0,1];
- 
+
+% C = [1,1,1,1,0,0;
+%      0,1,1,1,1,0;
+%      0,0,1,1,1,1;
+%      1,1,0,0,1,1];
+
 D       = sys2.D;
 n       = 6;
 ts      = 0.01;
@@ -124,9 +129,9 @@ zkk     = zeros(n,600);
 zkk(:,1)= zk1k1;
 for k = 1:N
     xkk1        = A*zk1k1 + B1*u1(:,k);
-    Zk1k1       = inv(Pk1k1);
-    Zkk1        = pinv(Q) - pinv(Q)*A*pinv(Zk1k1 + A'*pinv(Q)*A)*A'*pinv(Q);
-%     Zkk1        = inv( A*Pk1k1*A' + Q );
+%     Zk1k1       = inv(Pk1k1);
+%     Zkk1        = pinv(Q) - pinv(Q)*A*pinv(Zk1k1 + A'*pinv(Q)*A)*A'*pinv(Q);
+    Zkk1        = inv( A*Pk1k1*A' + Q );
     zkk1        = Zkk1*xkk1;
     
     ik          = C'*inv(R)*ynoisy(:,k);
@@ -175,17 +180,17 @@ hold off
 
 hr = 4;
 
-x       = cell(hr,1);
-x{1}    = [1,2,3]';
-x{2}    = [1,4]';
-x{3}    = [4,5]';
-x{4}    = [2,3,6]';
-
-d       = cell(hr,1);
-d{1}    = [4,5,6]';
-d{2}    = [2,3,5,6]';
-d{3}    = [1,2,3,6]';
-d{4}    = [1,4,5]';
+% x       = cell(hr,1);
+% x{1}    = [1,2,3]';
+% x{2}    = [1,4]';
+% x{3}    = [4,5]';
+% x{4}    = [2,3,6]';
+% 
+% d       = cell(hr,1);
+% d{1}    = [4,5,6]';
+% d{2}    = [2,3,5,6]';
+% d{3}    = [1,2,3,6]';
+% d{4}    = [1,4,5]';
 
 zt      = zeros(n,600);
 Pt1t1   = eye(n,n);
@@ -205,13 +210,13 @@ Zlkk1 = cell(hr,1);
 Ptmp = cell(hr,1);
 
 type = 3;       % CI = 1; EI = 2; ICI = 3
-tt = 100;
+tt = 1;
 l = tt;
-% for k = 1:tt
-%     xkk1 = A*zt1t1 + B1*u1(:,k);
-%     [zt1t1 Pt1t1]   = subsystem( A,B1,C,D, ynoisy(:,k), xkk1,zt1t1,Pt1t1, QQ,RR, type );
-%     zt(:,k)         = zt1t1;
-% end
+for k = 1:tt
+    xkk1 = A*zt1t1 + B1*u1(:,k);
+    [zt1t1 Pt1t1]   = subsystem( A,B1,C,D, ynoisy(:,k), xkk1,zt1t1,Pt1t1, QQ,RR, type );
+    zt(:,k)         = zt1t1;
+end
 zt1t1
 zkk(:,tt)
 

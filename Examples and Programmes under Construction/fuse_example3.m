@@ -10,12 +10,7 @@ x{3}    = [4,5]';
 x{4}    = [2,3,6]';
 
 zk1k1= [1.9278; -0.1936; 2.7214; 1.1245; 1.8360; 1.9433]
-% load('/Users/Nivas_Kumar/Desktop/haha1.mat','Ptmp','ztt');
-% Slkk = Ptmp;
-% xlkk = ztt;
-% zlkk = xlkk;
-
-load('/Users/Nivas_Kumar/Desktop/haha.mat','Zt1t1','ztt');
+load('haha.mat','Zt1t1','ztt');
 Slkk = Zt1t1;
 xlkk = ztt;
 
@@ -117,8 +112,22 @@ xf = Zf*zf
 [zf2, Zf2, xf2] = fuze2(ztt{3},ztt{4},Zt1t1{3},Zt1t1{4},x{3},x{4},type);
 [zff, Zff, xff] = fuze2(zf1,zf2,Zf1,Zf2,xf1,xf2,type);
 pinv(Zff)*zff
+real(Zff)
+zff
 
+[zf, Zf, xf] = haha(ztt{1},ztt{2},Zt1t1{1},Zt1t1{2},x{1},x{2},type);
+[zf, Zf, xf] = haha(zf,ztt{3},Zf,Zt1t1{3},xf,x{3},type);
+[zf, Zf, xf] = haha(zf,ztt{4},Zf,Zt1t1{4},xf,x{4},type);
+real(Zf)
+zf
+Zf = pinv(Zf);
+% Zf;
+xf = Zf*zf
 
+[zf1, Zf1, xf1] = haha(ztt{1},ztt{2},Zt1t1{1},Zt1t1{2},x{1},x{2},type);
+[zf2, Zf2, xf2] = haha(ztt{3},ztt{4},Zt1t1{3},Zt1t1{4},x{3},x{4},type);
+[zff, Zff, xff] = haha(zf1,zf2,Zf1,Zf2,xf1,xf2,type);
+pinv(Zff)*zff
 
 
 % % % z = cell(hr,1);

@@ -206,6 +206,9 @@ for i = 2:hr
     x_est = union( x_est, x{i} );
 end
 x_unest = setdiff([1:n],x_est)';
+size(A);
+length(x_est);
+length(x_unest);
 
 %% Sub-Systems
 
@@ -233,21 +236,7 @@ for i = 1:hr
     R{i}    = RR( i,i );
 end
 
-%% Inverse of Co-Variance Matrix
-
-% Zk1k1 = inv(Sk1k1);                     % Z(k-1/k-1)
-
-% Slk1k1 = cell(hr,1);                    % S(k-1/k-1)_l 
-% Zlk1k1 = cell(hr,1);                    % Z(k-1/k-1)_l 
-% for i = 1:hr
-%     Slk1k1{i} = Sk1k1( x{i},x{i} );
-% % % % %     Zlk1k1{i} = Zk1k1( x{i},x{i} );
-% end
-% tic
-% Zlk1k1 = bandinv(Slk1k1,L,x,hr,hc,0);
-% toc
-
-%% Predict Equation
+%% Prediction
 
 Slff = cell(hr,1);
 Slfd = cell(hr,1);
@@ -265,100 +254,46 @@ xlkk1 = cell(hr,1);
 tic
 parfor i = 1:hr
     xlkk1{i} = xkk1(x{i});
-%     Slkk1{i} = F{i}*Slff{i}*F{i}' + F{i}*Slfd{i}*D{i}' + (F{i}*Slfd{i}*D{i}')' + D{i}*Sldd{i}*D{i}' + G{i}*Q{i}*G{i}';
     Slkk1{i} = F{i}*Slff{i}*F{i}' + F{i}*Slfd{i}*D{i}' + (F{i}*Slfd{i}*D{i}')' + D{i}*Sldd{i}*D{i}' + Q{i};
-    Zlkk1{i} = inv(Slkk1{i});
 end
 toc
-% A*q*A';
-% ans(x{1},x{1})
-% Fl{1}*q*Fl{1}';
-% ans(x{1},x{1})
-% F{1}*q(x{1},x{1})*F{1}'+F{1}*q(x{1},d{1})*D{1}'+(F{1}*q(x{1},d{1})*D{1}')'+D{1}*q(d{1},d{1})*D{1}'
-
-% S(k/k-1)
-% tic
-% Skk1 = zeros(n,n);
-% Ttmp2                       = eye(n,n);
-% Ttmp2( x_est,x_est )        = 0;
-% Ttmp2                       = sparse(Ttmp2);
-% F_unest                     = Ttmp2*A;
-% G_unest                     = Ttmp2*B;
-% S_unest                     = Ttmp2*Sk1k1*Ttmp2';
-% F_unest                     = sparse(F_unest);
-% G_unest                     = sparse(G_unest);
-% S_unest                     = sparse(S_unest);
-% Skk1                        = F_unest*S_unest*F_unest' + Ttmp2*QQ;
-% toc
-
-
-% % % % Skk1( x_unest,x_unest ) =  A( x_unest,x_unest )*Sk1k1( x_unest,x_unest )*A( x_unest,x_unest )' ...
-% % % %                             + A( x_unest,x_unest )*Sk1k1( x_unest,x_est )*A( x_unest,x_est )' ...
-% % % %                             + (A( x_unest,x_unest )*Sk1k1( x_unest,x_est )*A( x_unest,x_est )')' ...
-% % % %                             + A( x_unest,x_est )*Sk1k1( x_est,x_est )*A( x_unest,x_est )' ...
-% % % %                             + QQ( x_unest,x_unest );
 
 % Z(k/k-1)_l
 tic
 % Zlkk1 = bandinv(Slkk1,L,x,hr,hc,0);
 toc
 
-% Ztmp = cell(hr,1);
-% for i = 1:hr
-%     Ztmp{i} = zeros(n,n);
-%     Ztmp{i}(x{i},x{i}) = Zlkk1{i};
-% end
-% ZZtmp = zeros(n,n);
-% for i = 1:hr
-%     ZZtmp = ZZtmp + Ztmp{i};
-% end
-
-% Stmp = zeros(n,n);
-% for i = 1:hr
-%     Stmp(x{i},x{i}) = Slkk1{i};
-% end
-% Ztmp = pinv(Stmp);
-% Zlkk1 = cell(hr,1);
-% for i = 1:hr
-%     Zlkk1{i} = Ztmp(x{i},x{i});
-% end
-
 % z(k/k-1)_l
 zlkk1 = cell(hr,1);
+tic
+Stmp = A*Sk1k1*A' + QQ;
+Ztmp = inv(Stmp);
+toc
 parfor i = 1:hr
-%     zlkk1{i} = Ztmp(x{i},x{i})*xkk1(x{i});
-    zlkk1{i} = Zlkk1{i}*xkk1(x{i});
-%     zlkk1{i} = ZZtmp(x{i},x{i})*xkk1(x{i}) + ZZtmp(x{i},d{i})*xkk1(d{i});
+%     Zlkk1{i} = Ztmp(x{i},x{i});
+    Zlkk1{i} = inv(Slkk1{i});
+    zlkk1{i} = Zlkk1{i}*xlkk1{i};
 end
 
-% for i = 1:hr
-%     Skk1( x{i},x{i} ) = Slkk1{i};
-% end
-
-% Z(k/k-1)
-% Zkk1 = inv(Skk1);
-% [bandl,bandu]=bandwidth(Skk1);
-% Zkk1 = bandinv(Skk1,max(bandl,bandu));
-
-% Z(k/k-1)_l
-% Zlkk1 = cell(hr,1);
-% for i = 1:hr
-%     Zlkk1{i} = Zkk1( x{i},x{i} );
-% end
-
-% z(k/k-1)_l
-% zkk1 = Zkk1*F*xk1k1;  
-% zkk1 = Zkk1*xkk1;
-% zlkk1 = cell(hr,1);
-% for i = 1:hr
-%     zlkk1{i} = zkk1( x{i} );
+% Zkk1        = Ztmp;
+% zkk1        = Zkk1*xkk1;
+% ik          = C'*inv(RR)*y;
+% Ik          = C'*inv(RR)*C;
+% zkk         = zkk1 + ik;
+% Zkk         = Zkk1 + Ik;
+% 
+% Zlkk = cell(hr,1);
+% zlkk = cell(hr,1);
+% parfor i = 1:hr
+%     Zlkk{i} = Zkk(x{i},x{i});
+%     zlkk{i} = zkk(x{i});
 % end
 
 %% Information Matrix (Local)
 
 inff = cell(hr,1);
 INFF = cell(hr,1);
-for i = 1:hr
+parfor i = 1:hr
     inff{i} = H{i}(:,x{i})'*inv(R{i})*y(i);
     INFF{i} = H{i}(:,x{i})'*inv(R{i})*H{i}(:,x{i});
 end
@@ -367,16 +302,16 @@ end
 
 Zlkk = cell(hr,1);
 zlkk = cell(hr,1);
-for i = 1:hr
+parfor i = 1:hr
     Zlkk{i} = Zlkk1{i} + INFF{i};
     zlkk{i} = zlkk1{i} + inff{i};
 end
 
+%% Kalman Filter
+
 % tic
 % Slkk = bandinv(Zlkk,L,x,hr,hc,0);
 % toc
-
-%% Kalman Filter
 
 % P_yy    = cell(hr,1);
 % P_xy    = cell(hr,1);
@@ -419,17 +354,6 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % CI,EI,ICI - Information Matrix
-
-% type = 3; 
-% [zff, Zff, xff] = fuze2(zlkk{1},zlkk{2},Zlkk{1},Zlkk{2},x{1},x{2},type);
-% [zff, Zff, xff] = fuze2(zff,zlkk{3},Zff,Zlkk{3},xff,x{3},type);
-% [zff, Zff, xff] = fuze2(zff,zlkk{4},Zff,Zlkk{4},xff,x{4},type);
-% pinv(Zff)*zff;
-
-% [zff1, Zff1, xff1] = fuze2(zlkk{1},zlkk{2},Zlkk{1},Zlkk{2},x{1},x{2},type);
-% [zff2, Zff2, xff2] = fuze2(zlkk{3},zlkk{4},Zlkk{3},Zlkk{4},x{3},x{4},type);
-% [zfff, Zfff, xfff] = fuze2(zff1,zff2,Zff1,Zff2,xff1,xff2,type);
-% pinv(Zff)*zff;
 
 tic
 nnn = hr;
