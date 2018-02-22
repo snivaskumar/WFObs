@@ -1,9 +1,45 @@
+% clear all
+% close all
+% clc
+% n = 6;
+% %A = rand(n,n);
+% A = rand(n,n) + n*eye(n,n);
+% A = (A*A')/norm(A*A');
+% AA = A;
+% L = n;
+% for i = 1:n
+%     for j = 1:n
+%         if abs(i-j) <= L
+%             A(i,j) = AA(i,j);
+%         else
+%             A(i,j) = 0;
+%         end
+%     end
+% end
+% DP = diag_dom(A)
+% hr = 4;
+% x       = cell(hr,1);
+% x{1}    = [1,2,3]';
+% x{2}    = [3,4]';
+% x{3}    = [4,5]';
+% x{4}    = [5,6]';
+% Z = inv(A);
+% Z1 = inv(A(x{1},x{1}));
+% Z2 = inv(A(x{2},x{2}));
+% Z3 = inv(A(x{3},x{3}));
+% Z(x{2},x{2})
+% Z2
+% ZZZ = inv(A([1:4],[1:4]));
+% ZZZ(x{2},x{2})
+
+%%
+
 clear all
 close all
 clc
 
 load('model.mat');
-L = 2;
+L = 6;
 for i = 1:6
     for j = 1:6
         if abs(i-j) <= L
@@ -77,6 +113,8 @@ for k = 1:N
     xkk1        = A*xk1k1 + B1*u1(:,k);
     Pkk1        = A*Pk1k1*A' + Q;
     
+%     DP = diag_dom(Pkk1)
+    
     dy          = ynoisy(:,k) - C*xkk1;
     Pyy         = R + C*Pkk1*C';
     Pxy         = Pkk1*C';
@@ -84,13 +122,15 @@ for k = 1:N
     xk1k1       = xkk1 + K*dy;
     Pk1k1       = ( eye(n,n) - K*C )*Pkk1;
     
+%     DP = diag_dom(Pk1k1)
+    
     xkk(:,k)    = xk1k1;
 end
 
 l = 100;
 
 figure
-subplot(221)
+subplot(231)
 set(gca,'FontSize',18)
 plot(t(1:l),xkk(1,1:l)','b','LineWidth',2)
 hold
@@ -99,26 +139,40 @@ legend('Estimated','True')
 title('Conventional KF - x1')
 hold off
 
-subplot(222)
+subplot(232)
 plot(t(1:l),xkk(2,1:l)','b','LineWidth',2)
 hold
 plot(t(1:l),xnf(1:l,2),'r')
 legend('Estimated','True')
 title('Conventional KF - x2')
 
-subplot(223)
+subplot(233)
 plot(t(1:l),xkk(3,1:l)','b','LineWidth',2)
 hold
 plot(t(1:l),xnf((1:l),3),'r')
 legend('Estimated','True')
 title('Conventional KF - x3')
 
-subplot(224)
+subplot(234)
 plot(t(1:l),xkk(4,1:l)','b','LineWidth',2)
 hold
 plot(t(1:l),xnf(1:l,4),'r')
 legend('Estimated','True')
 title('Conventional KF - x4')
+
+subplot(235)
+plot(t(1:l),xkk(5,1:l)','b','LineWidth',2)
+hold
+plot(t(1:l),xnf(1:l,5),'r')
+legend('Estimated','True')
+title('Conventional KF - x5')
+
+subplot(236)
+plot(t(1:l),xkk(6,1:l)','b','LineWidth',2)
+hold
+plot(t(1:l),xnf(1:l,6),'r')
+legend('Estimated','True')
+title('Conventional KF - x6')
 hold off
 
 %% Information Filter
@@ -145,7 +199,7 @@ for k = 1:N
 end
 
 figure
-subplot(221)
+subplot(231)
 set(gca,'FontSize',18)
 plot(t(1:l),zkk(1,1:l)','b','LineWidth',2)
 hold
@@ -154,26 +208,40 @@ legend('Estimated','True')
 title('Information KF - x1')
 hold off
 
-subplot(222)
+subplot(232)
 plot(t(1:l),zkk(2,1:l)','b','LineWidth',2)
 hold
 plot(t(1:l),xnf(1:l,2),'r')
 legend('Estimated','True')
 title('Information KF - x2')
 
-subplot(223)
+subplot(233)
 plot(t(1:l),zkk(3,1:l)','b','LineWidth',2)
 hold
 plot(t(1:l),xnf((1:l),3),'r')
 legend('Estimated','True')
 title('Information KF - x3')
 
-subplot(224)
+subplot(234)
 plot(t(1:l),zkk(4,1:l)','b','LineWidth',2)
 hold
 plot(t(1:l),xnf(1:l,4),'r')
 legend('Estimated','True')
 title('Information KF - x4')
+
+subplot(235)
+plot(t(1:l),zkk(5,1:l)','b','LineWidth',2)
+hold
+plot(t(1:l),xnf(1:l,5),'r')
+legend('Estimated','True')
+title('Information KF - x5')
+
+subplot(236)
+plot(t(1:l),zkk(6,1:l)','b','LineWidth',2)
+hold
+plot(t(1:l),xnf(1:l,6),'r')
+legend('Estimated','True')
+title('Information KF - x6')
 hold off
 
 %% DIstributed Information Filter
@@ -209,19 +277,20 @@ zlkk1 = cell(hr,1);
 Zlkk1 = cell(hr,1);
 Ptmp = cell(hr,1);
 
-type = 3;       % CI = 1; EI = 2; ICI = 3
-tt = 1;
+type = 4;       % CI = 1; EI = 2; ICI = 3
+tt = 100;
 l = tt;
 for k = 1:tt
     xkk1 = A*zt1t1 + B1*u1(:,k);
     [zt1t1 Pt1t1]   = subsystem( A,B1,C,D, ynoisy(:,k), xkk1,zt1t1,Pt1t1, QQ,RR, type );
     zt(:,k)         = zt1t1;
+%     DP = diag_dom(Pt1t1)
 end
 zt1t1
 zkk(:,tt)
 
 figure
-subplot(221)
+subplot(231)
 set(gca,'FontSize',18)
 plot(t(1:l),real(zt(1,1:l)'),'b','LineWidth',2)
 hold
@@ -230,7 +299,7 @@ legend('Estimated','True')
 title('Distributed Information KF - x1')
 hold off
 
-subplot(222)
+subplot(232)
 plot(t(1:l),real(zt(2,1:l)'),'b','LineWidth',2)
 hold
 plot(t(1:l),xnf(1:l,2),'r')
@@ -238,19 +307,35 @@ legend('Estimated','True')
 title('Distributed Information KF - x2')
 hold off
 
-subplot(223)
+subplot(233)
 set(gca,'FontSize',18)
 plot(t(1:l),real(zt(3,1:l)'),'b','LineWidth',2)
 hold
 plot(t(1:l),xnf(1:l,3),'r')
 legend('Estimated','True')
-title('Distributed Information KF - x1')
+title('Distributed Information KF - x3')
 hold off
 
-subplot(224)
+subplot(234)
 plot(t(1:l),real(zt(4,1:l)'),'b','LineWidth',2)
 hold
 plot(t(1:l),xnf(1:l,4),'r')
 legend('Estimated','True')
-title('Distributed Information KF - x2')
+title('Distributed Information KF - x4')
+
+subplot(235)
+set(gca,'FontSize',18)
+plot(t(1:l),real(zt(5,1:l)'),'b','LineWidth',2)
+hold
+plot(t(1:l),xnf(1:l,5),'r')
+legend('Estimated','True')
+title('Distributed Information KF - x5')
+hold off
+
+subplot(236)
+plot(t(1:l),real(zt(6,1:l)'),'b','LineWidth',2)
+hold
+plot(t(1:l),xnf(1:l,6),'r')
+legend('Estimated','True')
+title('Distributed Information KF - x6')
 hold off

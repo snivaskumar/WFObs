@@ -173,7 +173,7 @@ for k = 1:N
                     + (F{i}*Slfd{i}*D{i}')' ...
                     + D{i}*Sldd{i}*D{i}' + Q{i};
         
-        Ptmp(x{i},x{i}) = Ptt1{i};
+%         Ptmp(x{i},x{i}) = Ptt1{i};
         Zlkk1{i} = inv(Ptt1{i});
     end
 %     Zlkk1 = bandinv(Ptt1,1,x,hr,n,0);
@@ -190,53 +190,56 @@ for k = 1:N
         z{i} = ztt{i};
         Z{i} = Zt1t1{i};
     end
-    xf = x{1};
-    zf = z{1};
-    Zf = Z{1};
-    for i = 1:hr-1
-        xtmp = union(xf,x{i+1});
-        l = length(xtmp);
-        x_a = zeros(l,1);
-        x_b = zeros(l,1);
-        X_a = zeros(l,l);
-        X_b = zeros(l,l);
-
-        x_a(xf) = zf;
-        x_b(x{i+1}) = z{i+1};
-        X_a(xf,xf) = Zf;
-        X_b(x{i+1},x{i+1}) = Z{i+1};
-        
-%         [Si,Di] = eig(X_a);
-%         [Sj,Dj] = eig(pinv(Di^0.5)*pinv(Si)*X_b*Si*pinv(Di^0.5));
+%     xf = x{1};
+%     zf = z{1};
+%     Zf = Z{1};
+%     for i = 1:hr-1
+%         xtmp = union(xf,x{i+1});
+%         l = length(xtmp);
+%         x_a = zeros(l,1);
+%         x_b = zeros(l,1);
+%         X_a = zeros(l,l);
+%         X_b = zeros(l,l);
 % 
-%         Dij = zeros(size(Dj));
-%         for ii = 1: length(Dij)
-%             Dij(ii,ii) = min(1,Dj(ii,ii));
-%         end
+%         x_a(xf) = zf;
+%         x_b(x{i+1}) = z{i+1};
+%         X_a(xf,xf) = Zf;
+%         X_b(x{i+1},x{i+1}) = Z{i+1};
+%         
+% %         [Si,Di] = eig(X_a);
+% %         [Sj,Dj] = eig(pinv(Di^0.5)*pinv(Si)*X_b*Si*pinv(Di^0.5));
+% % 
+% %         Dij = zeros(size(Dj));
+% %         for ii = 1: length(Dij)
+% %             Dij(ii,ii) = min(1,Dj(ii,ii));
+% %         end
+% % 
+% %         Xij = Si*(Di^0.5)*Sj*Dij*pinv(Sj)*(Di^0.5)*pinv(Si);
 % 
-%         Xij = Si*(Di^0.5)*Sj*Dij*pinv(Sj)*(Di^0.5)*pinv(Si);
-
-%         w1 = X_a*pinv(X_a + X_b);
-%         w2 = X_b*pinv(X_a + X_b);
-%         xij = w1*x_b + w2*x_a;
-%                 
-%         zf  = x_a + x_b - xij;
-%         Zf  = X_a + X_b - Xij;
-
-        ZA      = X_a;
-        ZB      = X_b;
-        ff      = @(w) trace(-(ZA + ZB - ZA*pinv(w*ZB + (1-w)*ZA)*ZB)); % min -f = max f
-        omega   = fminbnd(ff,0,1,optimset('Display','off'));
-        Xij     = ZA*pinv(omega*ZB + (1-omega)*ZA)*ZB;
-        Zf      = X_a + X_b - Xij;
-        
-        K = ( X_a - (omega)*Xij )*pinv(Zf);
-        L = ( X_b - (1 - omega)*Xij )*pinv(Zf);
-        zf = K*x_a + L*x_b;
-        xf  = xtmp;
-    end
-    Pt1t1   = pinv(Zf);
-    xt1t1   = Pt1t1*zf;
+% %         w1 = X_a*pinv(X_a + X_b);
+% %         w2 = X_b*pinv(X_a + X_b);
+% %         xij = w1*x_b + w2*x_a;
+% %                 
+% %         zf  = x_a + x_b - xij;
+% %         Zf  = X_a + X_b - Xij;
+% 
+%         ZA      = X_a;
+%         ZB      = X_b;
+%         ff      = @(w) trace(-(ZA + ZB - ZA*pinv(w*ZB + (1-w)*ZA)*ZB)); % min -f = max f
+%         omega   = fminbnd(ff,0,1,optimset('Display','off'));
+%         Xij     = ZA*pinv(omega*ZB + (1-omega)*ZA)*ZB;
+%         Zf      = X_a + X_b - Xij;
+%         
+%         K = ( X_a - (omega)*Xij )*pinv(Zf);
+%         L = ( X_b - (1 - omega)*Xij )*pinv(Zf);
+%         zf = K*x_a + L*x_b;
+%         xf  = xtmp;
+%     end
+%     Pt1t1   = pinv(Zf);
+%     xt1t1   = Pt1t1*zf;
+    
+    [xt1t1,Pt1t1] = fuze(z,Z,x,hr,n);
+    
     xtt(:,k)    = xt1t1;
 end
 

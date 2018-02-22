@@ -1,4 +1,4 @@
-% function [zf,Zf,x_tmp] = haha(a,b,P1,P2,x1,x2,type);
+function [zf,Zf,x_tmp] = haha(a,b,P1,P2,x1,x2,type);
 
 a1 = a;
 b2 = b;

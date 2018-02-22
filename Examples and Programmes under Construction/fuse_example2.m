@@ -3,6 +3,7 @@ close all
 clc
 
 hr = 4;
+n = 6;
 x       = cell(hr,1);
 x{1}    = [1,2,3]';
 x{2}    = [1,4]';
@@ -57,12 +58,17 @@ pinv(ZC)*zc
 zc;
 real(ZC);
 
+[x,C] = IFAC(z,Z,x,hr,n);
+x
+
 type = 3;
 % i=2;j=3;
 % [zf,Zf,xf] = haha(a{i},a{j},Z{i},Z{j},x{i},x{j},type);
 % [zf,Zf,xf] = haha(zf,a{3},Zf,Z{3},xf,x{3},type);
 % [zf,Zf,xf] = haha(zf,a{4},Zf,Z{4},xf,x{4},type);
 % xf = pinv(Zf)*zf
+
+
 
 
 function [a,b,X_a,X_b,x_a,x_b] = hello(a,b,P1,P2,x1,x2);

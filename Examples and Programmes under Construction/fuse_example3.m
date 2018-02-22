@@ -3,6 +3,7 @@ close all
 clc
 
 hr = 4;
+n = 6;
 x       = cell(hr,1);
 x{1}    = [1,2,3]';
 x{2}    = [1,4]';
@@ -20,7 +21,7 @@ Z = Zt1t1;
 xf = x{1};
 zf = z{1};
 Zf = Z{1};
-type = 3
+type = 1
 for i = 1:hr-1
     xtmp = union(xf,x{i+1});
     l = max(xtmp);
@@ -112,55 +113,75 @@ xf = Zf*zf
 [zf2, Zf2, xf2] = fuze2(ztt{3},ztt{4},Zt1t1{3},Zt1t1{4},x{3},x{4},type);
 [zff, Zff, xff] = fuze2(zf1,zf2,Zf1,Zf2,xf1,xf2,type);
 pinv(Zff)*zff
-real(Zff)
-zff
+real(Zff);
+zff;
 
-[zf, Zf, xf] = haha(ztt{1},ztt{2},Zt1t1{1},Zt1t1{2},x{1},x{2},type);
-[zf, Zf, xf] = haha(zf,ztt{3},Zf,Zt1t1{3},xf,x{3},type);
-[zf, Zf, xf] = haha(zf,ztt{4},Zf,Zt1t1{4},xf,x{4},type);
-real(Zf)
-zf
-Zf = pinv(Zf);
-% Zf;
-xf = Zf*zf
+% [zf, Zf, xf] = haha(ztt{1},ztt{2},Zt1t1{1},Zt1t1{2},x{1},x{2},type);
+% [zf, Zf, xf] = haha(zf,ztt{3},Zf,Zt1t1{3},xf,x{3},type);
+% [zf, Zf, xf] = haha(zf,ztt{4},Zf,Zt1t1{4},xf,x{4},type);
+% real(Zf);
+% zf
+% Zf = pinv(Zf);
+% % Zf;
+% xf = Zf*zf
+% 
+% [zf1, Zf1, xf1] = haha(ztt{1},ztt{2},Zt1t1{1},Zt1t1{2},x{1},x{2},type);
+% [zf2, Zf2, xf2] = haha(ztt{3},ztt{4},Zt1t1{3},Zt1t1{4},x{3},x{4},type);
+% [zff, Zff, xff] = haha(zf1,zf2,Zf1,Zf2,xf1,xf2,type);
+% pinv(Zff)*zff
 
-[zf1, Zf1, xf1] = haha(ztt{1},ztt{2},Zt1t1{1},Zt1t1{2},x{1},x{2},type);
-[zf2, Zf2, xf2] = haha(ztt{3},ztt{4},Zt1t1{3},Zt1t1{4},x{3},x{4},type);
-[zff, Zff, xff] = haha(zf1,zf2,Zf1,Zf2,xf1,xf2,type);
-pinv(Zff)*zff
+%%
 
+% clear all
+% close all
+% clc
 
-% % % z = cell(hr,1);
-% % % Z = cell(hr,1);
-% % % xf= cell(hr,1);
-% % % for i=1:hr
-% % %     xf{i}           = [1:6]';
-% % %     z{i}            = zeros(6,1);
-% % %     Z{i}            = zeros(6,6);
-% % %     z{i}(x{i})      = ztt{i};
-% % %     Z{i}(x{i},x{i}) = Zt1t1{i};
-% % %     xf{i}(x{i})     = x{i};
-% % % end
-% % % [zf1, Zf1, xf1] = fuze2(z{1},z{2},Z{1},Z{2},xf{1},xf{2});
-% % % xf1
-% % % zf1
-% % % Zf1;
-% % % [zf2, Zf2, xf2] = fuze2(z{3},z{4},Z{3},Z{4},xf{3},xf{4});
-% % % xf2
-% % % zf2
-% % % Zf2;
-% % % [zff, Zff, xff] = fuze2(zf1,zf2,Zf1,Zf2,xf1,xf2);
-% % % xff;
-% % % Zff
-% % % pinv(Zff)*zff
-% % % 
-% % % [zf1, Zf1, xf1] = fuze2(z{1},z{2},Z{1},Z{2},xf{1},xf{2});
-% % % zf1
-% % % [zf1, Zf1, xf1] = fuze2(zf1,z{3},Zf1,Z{3},xf1,xf{3});
-% % % zf1
-% % % [zf1, Zf1, xf1] = fuze2(zf1,z{4},Zf1,Z{4},xf1,xf{4});
-% % % pinv(Zf1)*zf1
+% hr = 4;
+% n = 6;
+% x       = cell(hr,1);
+% x{1}    = [1,2,3]';
+% x{2}    = [1,4]';
+% x{3}    = [4,5]';
+% x{4}    = [2,3,6]';
+% 
+% zk1k1= [1.9278; -0.1936; 2.7214; 1.1245; 1.8360; 1.9433]
 
+load('haha.mat','Zt1t1','ztt');
+z = ztt;
+Z = Zt1t1;
 
+% load('haha1.mat','Ptmp','ztt');
+% z = ztt;
+% Z = Ptmp;
 
+H = [];
+k = 0;
+nn = 0;
+for i = 1:hr
+    l               = length(x{i});
+    nn              = nn + l;
+    H(k+1:nn,:)     = zeros(l,n);
+    H(k+1:nn,x{i})  = eye(l,l);
+    k               = k + l;
+end
 
+C = [];
+nn = 0;
+k = 0;
+for i = 1:hr
+    l               = length(x{i});
+    nn              = nn + l;
+    CC              = inv(Z{i});     
+%     C(k+1:nn,k+1:nn)= (1/l).*CC;
+    C(k+1:nn,k+1:nn)= inv((1/l).*CC);
+    xx(k+1:nn,:)    = CC*z{i};
+    k               = k + l;
+end
+
+% Ze = inv(H'*inv(C)*H);
+% ze = Ze*H'*inv(C)*xx
+
+Ze = inv(H'*(C)*H);
+ze = Ze*H'*(C)*xx
+% Ce = inv(Ze);
+% xe = Ce*ze

@@ -360,56 +360,62 @@ nnn = hr;
 zf = zlkk;
 Pf = Zlkk;
 xf = x;
-zfkk = cell(ceil(hr/2),1);
-Pfkk = cell(ceil(hr/2),1);
-xfkk = cell(ceil(hr/2),1);
+if type ~= 4 
+    type;
+    zfkk = cell(ceil(hr/2),1);
+    Pfkk = cell(ceil(hr/2),1);
+    xfkk = cell(ceil(hr/2),1);
 
-if nnn ~= 1
-    if rem(nnn,2) == 0
-        nnn = nnn;
-        flag = 0;
-    else
-        nnn = nnn - 1;
-        flag = 1;
-    end
-    nnn = nnn/2;
-    while nnn >= 1
-        ii = 0;
-        parfor i = 1:(nnn)
-            ii = i + (i - 1);
-            [zfkk{i}, Pfkk{i}, xfkk{i}]  = fuze2(zf{ii},zf{ii+1},Pf{ii},Pf{ii+1},xf{ii},xf{ii+1},type);
-        end
-        if flag == 1
-            loc = (nnn);
-            [zfkk{loc}, Pfkk{loc}, xfkk{loc}]  = ...
-                    fuze2(zfkk{loc},zf{2*nnn+1},Pfkk{loc},Pf{2*nnn+1},xfkk{loc},xf{2*nnn+1},type);
-        end
-        if nnn == 1
-            nnn     = nnn/2;
-            zkk     = zfkk{1};
-            Pkk     = Pfkk{1};
-            xfkk    = xfkk{1};  
+    if nnn ~= 1
+        if rem(nnn,2) == 0
+            nnn = nnn;
+            flag = 0;
         else
-            zf = zfkk;
-            Pf = Pfkk;
-            xf = xfkk;
-            zfkk = cell(ceil(nnn/2),1);
-            Pfkk = cell(ceil(nnn/2),1);
-            xfkk = cell(ceil(nnn/2),1);
-            if ((rem(nnn/2,2) == 0)) || (nnn == 2)
-                nnn = nnn/2;
-                flag = 0;
-            else
-                nnn = ((nnn) - 1)/2;
-                flag = 1;
-            end
+            nnn = nnn - 1;
+            flag = 1;
         end
-        nnn = nnn;
+        nnn = nnn/2;
+        while nnn >= 1
+            ii = 0;
+            parfor i = 1:(nnn)
+                ii = i + (i - 1);
+                [zfkk{i}, Pfkk{i}, xfkk{i}]  = fuze2(zf{ii},zf{ii+1},Pf{ii},Pf{ii+1},xf{ii},xf{ii+1},type);
+            end
+            if flag == 1
+                loc = (nnn);
+                [zfkk{loc}, Pfkk{loc}, xfkk{loc}]  = ...
+                        fuze2(zfkk{loc},zf{2*nnn+1},Pfkk{loc},Pf{2*nnn+1},xfkk{loc},xf{2*nnn+1},type);
+            end
+            if nnn == 1
+                nnn     = nnn/2;
+                zkk     = zfkk{1};
+                Pkk     = Pfkk{1};
+                xfkk    = xfkk{1};  
+            else
+                zf = zfkk;
+                Pf = Pfkk;
+                xf = xfkk;
+                zfkk = cell(ceil(nnn/2),1);
+                Pfkk = cell(ceil(nnn/2),1);
+                xfkk = cell(ceil(nnn/2),1);
+                if ((rem(nnn/2,2) == 0)) || (nnn == 2)
+                    nnn = nnn/2;
+                    flag = 0;
+                else
+                    nnn = ((nnn) - 1)/2;
+                    flag = 1;
+                end
+            end
+            nnn = nnn;
+        end
     end
+    toc
+    Ptmp            = pinv(Pkk);
+    xtmp            = Ptmp*zkk;
+else
+    4;
+    [xtmp,Ptmp] = fuze(zf,Pf,xf,hr,n,x_est);
 end
-toc
-Ptmp            = pinv(Pkk);
-xtmp            = Ptmp*zkk;
 
 Pkk             = zeros(n,n);
 Pkk(x_est,x_est)= Ptmp;
