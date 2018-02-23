@@ -116,6 +116,9 @@ pinv(Zff)*zff
 real(Zff);
 zff;
 
+[xe,Ce] = fuze(z,Z,x,hr,n);
+xe
+
 % [zf, Zf, xf] = haha(ztt{1},ztt{2},Zt1t1{1},Zt1t1{2},x{1},x{2},type);
 % [zf, Zf, xf] = haha(zf,ztt{3},Zf,Zt1t1{3},xf,x{3},type);
 % [zf, Zf, xf] = haha(zf,ztt{4},Zf,Zt1t1{4},xf,x{4},type);
@@ -146,42 +149,42 @@ zff;
 % 
 % zk1k1= [1.9278; -0.1936; 2.7214; 1.1245; 1.8360; 1.9433]
 
-load('haha.mat','Zt1t1','ztt');
-z = ztt;
-Z = Zt1t1;
-
-% load('haha1.mat','Ptmp','ztt');
+% load('haha.mat','Zt1t1','ztt');
 % z = ztt;
-% Z = Ptmp;
-
-H = [];
-k = 0;
-nn = 0;
-for i = 1:hr
-    l               = length(x{i});
-    nn              = nn + l;
-    H(k+1:nn,:)     = zeros(l,n);
-    H(k+1:nn,x{i})  = eye(l,l);
-    k               = k + l;
-end
-
-C = [];
-nn = 0;
-k = 0;
-for i = 1:hr
-    l               = length(x{i});
-    nn              = nn + l;
-    CC              = inv(Z{i});     
-%     C(k+1:nn,k+1:nn)= (1/l).*CC;
-    C(k+1:nn,k+1:nn)= inv((1/l).*CC);
-    xx(k+1:nn,:)    = CC*z{i};
-    k               = k + l;
-end
-
-% Ze = inv(H'*inv(C)*H);
-% ze = Ze*H'*inv(C)*xx
-
-Ze = inv(H'*(C)*H);
-ze = Ze*H'*(C)*xx
-% Ce = inv(Ze);
-% xe = Ce*ze
+% Z = Zt1t1;
+% 
+% % load('haha1.mat','Ptmp','ztt');
+% % z = ztt;
+% % Z = Ptmp;
+% 
+% H = [];
+% k = 0;
+% nn = 0;
+% for i = 1:hr
+%     l               = length(x{i});
+%     nn              = nn + l;
+%     H(k+1:nn,:)     = zeros(l,n);
+%     H(k+1:nn,x{i})  = eye(l,l);
+%     k               = k + l;
+% end
+% 
+% C = [];
+% nn = 0;
+% k = 0;
+% for i = 1:hr
+%     l               = length(x{i});
+%     nn              = nn + l;
+%     CC              = inv(Z{i});     
+% %     C(k+1:nn,k+1:nn)= (1/l).*CC;
+%     C(k+1:nn,k+1:nn)= inv((1/l).*CC);
+%     xx(k+1:nn,:)    = CC*z{i};
+%     k               = k + l;
+% end
+% 
+% % Ze = inv(H'*inv(C)*H);
+% % ze = Ze*H'*inv(C)*xx
+% 
+% Ze = inv(H'*(C)*H);
+% ze = Ze*H'*(C)*xx
+% % Ce = inv(Ze);
+% % xe = Ce*ze

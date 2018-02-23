@@ -1,4 +1,4 @@
-function [x,C] = fuze(z,Z,x,hr,n,x_est);
+function [xe,Ce] = fuze(z,Z,x,hr,n,x_est);
 H = [];
 k = 0;
 nn = 0;
@@ -10,37 +10,28 @@ for i = 1:hr
     k               = k + l;
 end
 
-C = [];
-nn = 0;
-k = 0;
+Ze  = [];
+nn  = 0;
+k   = 0;
 for i = 1:hr
-    l               = length(x{i});
-    nn              = nn + l;
-%     C(k+1:nn,k+1:nn)= (l).*Z{i};
-%     C(k+1:nn,k+1:nn)= (1/l).*Z{i};
-%     C(k+1:nn,k+1:nn)= Z{i};
-%     xx(k+1:nn,:)    = z{i};
-
-    CC              = inv(Z{i});     
-%     C(k+1:nn,k+1:nn)= (1/l).*CC;
-    C(k+1:nn,k+1:nn)= inv( (1/l).*CC );
-    xx(k+1:nn,:)    = CC*z{i};
-
-    k               = k + l;
+    C{i} = inv(Z{i});
 end
 
-% Ze = inv(H'*inv(C)*H);
-% ze = Ze*H'*inv(C)*xx;
+for i = 1:hr
+    l                   = length(x{i});
+    nn                  = nn + l;
+    
+    Ze(k+1:nn,k+1:nn)   = inv( (1/l).*C{i} );
+    xx(k+1:nn,:)        = C{i}*z{i};
 
-Ze = pinv(H'*(C)*H);
-ze = Ze*H'*(C)*xx;
+    k                   = k + l;
+end
 
-% Ce = inv(Ze);
-% xe = Ce*ze;
+if nargin == 6
+    H = H(:,x_est);
+end
 
-% C = Ze;
-% x = ze;
+Ce = inv(H'*Ze*H);
+xe = Ce*H'*Ze*xx;
 
-C = Ze(x_est,x_est);
-x = ze(x_est);
 end

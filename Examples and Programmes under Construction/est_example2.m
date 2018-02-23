@@ -282,13 +282,18 @@ tt = 100;
 l = tt;
 for k = 1:tt
     xkk1 = A*zt1t1 + B1*u1(:,k);
-    [zt1t1 Pt1t1]   = subsystem( A,B1,C,D, ynoisy(:,k), xkk1,zt1t1,Pt1t1, QQ,RR, type );
+%     [zt1t1 Pt1t1]   = subsystem( A,B1,C,D, ynoisy(:,k), xkk1,zt1t1,Pt1t1, QQ,RR, type );
+    
+    [x,d,F,D,G,H,Q,R,l,n,x_est,x_unest] = subsystem_output( A,B1,C,D,QQ,RR);
+    [zt1t1 Pt1t1] = distributed_linear( x,d,l,n, F,D,G,H,Q,R, ynoisy(:,k), xkk1,zt1t1,Pt1t1, x_est,x_unest, type );
+    
     zt(:,k)         = zt1t1;
 %     DP = diag_dom(Pt1t1)
 end
 zt1t1
 zkk(:,tt)
 
+l = tt;
 figure
 subplot(231)
 set(gca,'FontSize',18)

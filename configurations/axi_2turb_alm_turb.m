@@ -37,6 +37,7 @@ switch lower(strucObs.filtertype)
         strucObs.R_k = 1.0; % Measurement   covariance matrix
         strucObs.Q_k = 1.0; % Process noise covariance matrix
         strucObs.P_0 = 0.5; % Initial state covariance matrix
+        strucObs.stateEst = true;  % Estimate model states
 
         % Other model settings
         scriptOptions.exportPressures = false; % Model/predict/filter pressure terms
