@@ -90,6 +90,9 @@ if sol.k==1
     strucObs.M      = strucObs.nrobs+strucObs.measPw*Wp.turbine.N; % total length of measurements
 end
 
+%%%%%%%%%%%%
+% Recursive Steps
+
 % Calculate sigma points
 if strucObs.stateEst % Write the system states to the sigma points
     strucObs.Aen = repmat(sol.x,1,strucObs.nrens); 
@@ -114,6 +117,7 @@ strucObs.Aen(:,strucObs.L+2:end) = strucObs.Aen(:,strucObs.L+2:end) - Uscented_d
 Aenf  = zeros(strucObs.L,strucObs.nrens);   % Initialize empty forecast matrix
 Yenf  = zeros(strucObs.M,strucObs.nrens);   % Initialize empty output matrix
 
+tic
 parfor(ji=1:strucObs.nrens)
     syspar   = sys; % Copy system matrices
     solpar   = sol; % Copy solution from prev. time instant
@@ -163,9 +167,10 @@ parfor(ji=1:strucObs.nrens)
         Yenf(:,ji) = [solpar.x(strucObs.obs_array)];
     end    
 end
-
+toc
 
 %% Analysis update of the Unscented KF
+tic
 if strucObs.measPw
     y_meas = [sol.measuredData.sol(strucObs.obs_array);sol.measuredData.power];
 else
@@ -182,7 +187,9 @@ Pfxyk = Aenft*strucObs.W*Yenft';               % Pyy for k|k-1
 Kk          = Pfxyk * pinv(Pfyyk);
 xSolAll     = xmean + Kk*(y_meas-ymean);
 strucObs.Px = Pfxxk - Kk * Pfyyk * Kk';
+toc
 
+xSolAll;
 %% Post-processing
 if strucObs.tune.est
     % Update model parameters with the optimal estimate

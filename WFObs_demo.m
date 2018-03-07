@@ -68,15 +68,15 @@ scriptOptions.Animate           = 10;  % Show results every x iterations (0: no 
    scriptOptions.plotCenterline = 1;  % Plot centerline speed of the wake (m/s)
 
 % Saving settings
-scriptOptions.savePlots         = 0;  % Save all plots in external files at each time step
-scriptOptions.saveWorkspace     = 0;  % Save complete workspace at the end of simulation
-scriptOptions.savePath          = ['results/tmp']; % Destination folder of saved files
+scriptOptions.savePlots         = 1;  % Save all plots in external files at each time step
+scriptOptions.saveWorkspace     = 1;  % Save complete workspace at the end of simulation
+scriptOptions.savePath          = ['/Users/Nivas_Kumar/Documents/NivasStudyMaterials/TUDelft/EnKF+WFSim/WFObs/results/tmp']; % Destination folder of saved files
 
 % Configuration file
 configName = 'axi_2turb_alm_turb'; % See './configurations' for options
 
 %% Execute the WFObs core code (+ overwrite meshing.m settings, if applicable)
 WpOverwrite = struct(); % Struct to overwrite settings from meshing.m
-% WpOverwrite.sim.NN = 1500; % Stop after [x] steps
+WpOverwrite.sim.NN = 1500; % Stop after [x] steps
 run('WFObs_addpaths.m'); % Import libraries for WFObs & WFSim
 outputData = WFObs_core(scriptOptions,configName,WpOverwrite);

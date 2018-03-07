@@ -180,13 +180,6 @@ for i = 1:tur
     d{i} = unique(d{i});
 end
 
-
-% % % % for i = 1:tur
-% % % %     x{i} = union( x{i}, x_unest );
-% % % % end
-% % % % x_est = [1:n]';
-% % % % x_unest = [];
-
 %% Sub-Systems
 
 F   = cell(tur,1);                 % Local A
@@ -213,16 +206,6 @@ for i = 1:tur
     
     Q{i}    = QQ( x{i},x{i} );
 end
-% tmp1 = [1:5,11]';
-% tmp2 = [6:10,15]';
-
-%     H{1}    = Ck( tmp1,x{1} );
-%     R{1}    = RR( tmp1,tmp1 );
-%     y{1}    = yy( tmp1 );
-%     
-%     H{2}    = Ck( tmp2,x{2} );
-%     R{2}    = RR( tmp2,tmp2 );
-%     y{2}    = yy( tmp2 );
 
 P_unest = [];
 % P_unest = A( x_unest,x_unest )*Sk1k1( x_unest,x_unest )*A( x_unest,x_unest )' ...
