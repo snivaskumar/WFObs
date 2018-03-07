@@ -116,7 +116,7 @@ pinv(Zff)*zff
 real(Zff);
 zff;
 
-[xe,Ce] = fuze(z,Z,x,hr,n);
+[xe,Ce] = fuze(z,Z,x,hr,n,[1:n]',2);
 xe
 
 % [zf, Zf, xf] = haha(ztt{1},ztt{2},Zt1t1{1},Zt1t1{2},x{1},x{2},type);

@@ -1,4 +1,4 @@
-function [x,d,F,D,G,H,Q,R,hr,n,x_est,x_unest] = subsystem_output( Ak,Bk,Ck,Dk,QQ,RR);
+function [x,d,p,pp ,F,D,G,H,Q,R,y,hr,n,x_est,x_unest, lc] = subsystem_output( Ak,Bk,Ck,Dk,QQ,RR,yy);
 % [x,d,F,D,G,H,Q,R] = subsystem_output( Ak,Bk,Ck,Dk);
 
 % Ak = [11 12 0 0 0; 21 22 0 24 0; 31 0 33 0 0; 0 0 43 0 45; 0 0 0 54 55]
@@ -167,6 +167,28 @@ end
 %     x{i}    = cx;
 %     clear rx cx I
 % end
+
+for i = 1:hr
+    x{i} = unique(x{i});
+end
+
+pp = cell(hr,1);
+parfor i = 1:hr
+    for j = 1:length(x{i});
+        if sum( double( x{j} == p ) ) == 1
+            pp{i} = [pp{i};x{j}];
+        end
+    end
+end
+
+x_est = x{1};
+for i = 2:hr
+    x_est = union( x_est, x{i} );
+end
+x_unest = setdiff([1:n],x_est)';
+size(A);
+length(x_est);
+length(x_unest);
 %% Internal Input
 d = cell(hr,1);
 
@@ -187,28 +209,17 @@ d = cell(hr,1);
 ddd = zeros(n,1);
 for i = 1:hr
     clear rtmp ctmp tmp
-    tmp         = setdiff([1:n],x{i});
+    tmp         = setdiff(x_est,x{i});
 %     tmp         = find(~rho_locl.cross(:,i));
     [rtmp ctmp] = find( A(x{i},tmp) );
     ctmp        = unique(ctmp);
     d{i}        = [d{i}, tmp(ctmp)];
 %     ddd         = [ddd, d{i}];
 end
-% x_est = x{1};
+
 for i = 1:hr
-    x{i} = unique(x{i});
     d{i} = unique(d{i});
-%     x_est= [x_est; x{i}];
-%     x_est= unique(x_est);
 end
-x_est = x{1};
-for i = 2:hr
-    x_est = union( x_est, x{i} );
-end
-x_unest = setdiff([1:n],x_est)';
-size(A);
-length(x_est);
-length(x_unest);
 
 %% Sub-Systems
 
@@ -220,6 +231,7 @@ G   = cell(hr,1);                 % Local External Input
 T   = cell(hr,1);
 Q   = cell(hr,1);
 R   = cell(hr,1);
+y   = cell(hr,1);
 for i = 1:hr
 %     Ttmp	= eye(n,n);
 %     Ttmp(setdiff([1:n],x{i}),setdiff([1:n],x{i})) = 0;
@@ -230,8 +242,8 @@ for i = 1:hr
 %     Fl{i}   = sparse(Fl{i});
     D{i}    = A( x{i},d{i} );
     G{i}    = B( x{i},: );
-% % %     H{i}    = C( i,x{i} );
-    H{i}    = C( i,: );
+    H{i}    = C( i,x{i} );
+    y{i}    = yy(i);
     Q{i}    = QQ( x{i},x{i} );
     R{i}    = RR( i,i );
 end

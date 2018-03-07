@@ -91,11 +91,12 @@ RR      = strucObs.R_k*eye(lop,lop);
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 % Distributed Information Filter
 tic
-type = 3;       % CI = 0,1; EI = 2; ICI = 3, IFAC = 4
+type    = 4;       % CI = 0,1; EI = 2; ICI = 3, IFAC = 4
+typeCZ  = 2;       % 1 if Z = Co-Variance, 2 if Z = Information, 
 % [xkk Pkk]   = subsystem( Fk,Bk,Ck,Dk, y,xkk1,xk1k1,Sk1k1, QQ,RR, type );
 
-% [x,d,F,D,G,H,Q,R,l,n,x_est,x_unest] = subsystem_output(Fk,Bk,Ck,Dk,QQ,RR);
-tur = 2;
+% [x,d,F,D,G,H,Q,R,y,l,n,x_est,x_unest] = subsystem_output(Fk,Bk,Ck,Dk,QQ,RR,y);
+tur = Wp.turbine.N;
 if strucObs.stateEst || strucObs.measFlow
 	stateLocArray = zeros(strucObs.size_output,2);
     for iii = 1:strucObs.size_output
@@ -103,9 +104,15 @@ if strucObs.stateEst || strucObs.measFlow
         stateLocArray(iii,:) = [loci.x, loci.y];
     end
 end
-[x,d,F,D,G,H,Q,R,l,n,x_est,x_unest] = subsystem_turbine(Fk,Bk,Ck,QQ,RR, tur,stateLocArray);
 
-[xkk Pkk] = distributed_linear( x,d,l,n, F,D,G,H,Q,R, y, xkk1,xk1k1,Sk1k1, x_est,x_unest, type );
+turbLocArray = zeros(Wp.turbine.N,2);
+for iii = 1:Wp.turbine.N
+    turbLocArray(iii,:) = [Wp.turbine.Crx(iii),Wp.turbine.Cry(iii)];
+end
+    
+[x,d,p,pp, F,D,G,H,Q,R,y,l,n,x_est,x_unest, P_unest] = subsystem_turbine(Fk,Bk,Ck,QQ,RR,y, tur,stateLocArray,turbLocArray, Sk1k1);
+
+[xkk Pkk] = distributed_linear( x,d,p,pp,l,n, F,D,G,H,Q,R, y, xkk1,xk1k1,Sk1k1, x_est,x_unest, P_unest, type,typeCZ );
 toc
 
 sol_out.x   = xkk;

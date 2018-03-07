@@ -2,7 +2,6 @@ clear all
 close all
 clc
 
-
 n       = 1;    % Number of states
 l       = 1;    % Number of Output
 ts      = 1;    % Sampling Period

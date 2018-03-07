@@ -43,6 +43,7 @@ switch lower(strucObs.filtertype)
         scriptOptions.exportPressures = false; % Model/predict/filter pressure terms
         scriptOptions.Linearversion   = true;  % Calculate linearized system matrices: necessary for ExKF
     
+        strucObs.tune.est  = false; % Estimate model parameters
     
     % Extended Kalman filter (ExKF)
     case {'exkf'}
