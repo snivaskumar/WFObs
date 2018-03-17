@@ -26,6 +26,10 @@ if sol_in.k == 1
     for iii = 1:Wp.turbine.N
         turbLocArray(iii,:) = [Wp.turbine.Crx(iii),Wp.turbine.Cry(iii)];
     end
+    strucObs.state = stateLocArray;
+end
+
+if sol_in.k == 1
     % Setup covariance and system output matrices
     if options.exportPressures
         strucObs.Pk    = sparse(eye(strucObs.size_state))*strucObs.P_0;
@@ -73,7 +77,7 @@ if (sol_in.k == 1) || (rem(sol_in.k,50) == 0)
     strucObs.Fk     = Fk;
     strucObs.Bk     = Bk;
     strucObs.Ck     = Ck;
-    strucObs.state  = stateLocArray;
+%     strucObs.state  = stateLocArray;
 end
 % toc
 Fk      = strucObs.Fk;
