@@ -32,6 +32,68 @@ strucObs.sensorsPath = 'sensors_apc_9turb_alm'; % measurement setup filename (se
 strucObs.filtertype = 'enkf'; % Observer types are outlined next
 switch lower(strucObs.filtertype)
     
+    case {'dexkf'}
+        % Covariances
+        strucObs.R_k = 1.0; % Measurement   covariance matrix
+        strucObs.Q_k = 1.0; % Process noise covariance matrix
+        strucObs.P_0 = 0.5; % Initial state covariance matrix
+        strucObs.stateEst = true;  % Estimate model states
+
+        % Other model settings
+        scriptOptions.exportPressures = false; % Model/predict/filter pressure terms
+        scriptOptions.Linearversion   = true;  % Calculate linearized system matrices: necessary for ExKF
+    
+        strucObs.tune.est  = false; % Estimate model parameters
+        
+        strucObs.Subsys_length  = 1;        % Length of the subsystem around each turbine 
+                                % Subsys_length = 1  if Subsys_length = 1D
+                                % (D = Rotor length)
+                                % Subsys_length = 2  if Subsys_length = 2D
+                                % Subsys_length = 3  if Subsys_length = 3D
+                                % Subsys_length = 4  if Subsys_length = 4D
+                                % Subsys_length = x  if Subsys_length = x
+        strucObs.fusion_type    = 4;        % CI = 0,1; EI = 2; ICI = 3, IFAC = 4
+        strucObs.typeCZ         = 2;        % 1 if Z = Co-Variance, 2 if Z = Information
+        
+    % Distributed Unscented Kalman filter (UKF)    
+    case {'dukf'}
+        % General settings
+        strucObs.stateEst             = true; % Do state estimation: true/false
+        scriptOptions.exportPressures = false; % Model, predict and filter pressure terms
+        
+        % Covariances
+        strucObs.R_k   = 0.10;  % Measurement   covariance matrix
+        strucObs.R_ePW = 1e-3;  % Measurement noise for turbine power measurements        
+        strucObs.Q_k.u = 0.10;  % Process noise covariance matrix
+        strucObs.Q_k.v = 0.01;  % Process noise covariance matrix
+        strucObs.Q_k.p = 0.0;   % Process noise covariance matrix        
+        strucObs.P_0.u = 0.10;  % Initial state covariance matrix
+        strucObs.P_0.v = 0.10;  % Initial state covariance matrix
+        strucObs.P_0.p = 0.0;   % Initial state covariance matrix      
+
+        % Online model parameter adaption/estimation/tuning
+        strucObs.tune.est  = true; % Do estimation
+        strucObs.tune.vars = {'site.lmu'}; % If empty {} then no estimation
+        strucObs.tune.Q_k  = [1e-3]; % Standard dev. for process noise 'u' in m/s
+        strucObs.tune.P_0  = [1e-1]; % Width of uniform dist. around opt. estimate for initial ensemble
+        strucObs.tune.lb   = [0.05]; % Lower bound
+        strucObs.tune.ub   = [3.00]; % Upper bound
+        
+        % Sigma-point generation settings
+        strucObs.alpha = 1e0;
+        strucObs.beta  = 2; % 2 is optimal for Gaussian distributions
+        strucObs.kappa = 0; % "0" or "3-L"
+        
+        % Other model settings
+        scriptOptions.Linearversion = false;   % Calculate linearized system matrices
+        
+        strucObs.Subsys_length  = 200;        % Length of the subsystem around each turbine 
+                                % Subsys_length = 1  if Subsys_length = d (d = 632.0623)
+                                % Subsys_length = 2  if Subsys_length = d/2
+                                % Subsys_length = x  if Subsys_length = x
+        strucObs.fusion_type    = 4;        % CI = 0,1; EI = 2; ICI = 3, IFAC = 4
+        strucObs.typeCZ         = 2;        % 1 if Z = Co-Variance, 2 if Z = Information
+        
     % Extended Kalman filter (ExKF)
     case {'exkf'}
         % Covariances

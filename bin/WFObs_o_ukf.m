@@ -117,7 +117,7 @@ strucObs.Aen(:,strucObs.L+2:end) = strucObs.Aen(:,strucObs.L+2:end) - Uscented_d
 Aenf  = zeros(strucObs.L,strucObs.nrens);   % Initialize empty forecast matrix
 Yenf  = zeros(strucObs.M,strucObs.nrens);   % Initialize empty output matrix
 
-tic
+% tic
 parfor(ji=1:strucObs.nrens)
     syspar   = sys; % Copy system matrices
     solpar   = sol; % Copy solution from prev. time instant
@@ -167,10 +167,10 @@ parfor(ji=1:strucObs.nrens)
         Yenf(:,ji) = [solpar.x(strucObs.obs_array)];
     end    
 end
-toc
+% toc
 
 %% Analysis update of the Unscented KF
-tic
+% tic
 if strucObs.measPw
     y_meas = [sol.measuredData.sol(strucObs.obs_array);sol.measuredData.power];
 else
@@ -187,7 +187,7 @@ Pfxyk = Aenft*strucObs.W*Yenft';               % Pyy for k|k-1
 Kk          = Pfxyk * pinv(Pfyyk);
 xSolAll     = xmean + Kk*(y_meas-ymean);
 strucObs.Px = Pfxxk - Kk * Pfyyk * Kk';
-toc
+% toc
 
 xSolAll;
 %% Post-processing

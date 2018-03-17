@@ -1,15 +1,4 @@
 function [Wp,sol_out,strucObs] = WFObs_o_dexkf(strucObs,Wp,sys_in,sol_in,options)
-% WFOBS_O_EXKF  Extended KF algorithm for recursive state estimation
-%
-%   SUMMARY
-%    This code performs state estimation using the Extended Kalman filter
-%    (ExKF) algorithm. It uses high-fidelity measurements
-%    (sol.measuredData) to improve the flow estimation compared to
-%    open-loop simulations with WFSim.
-%
-%   RELEVANT INPUT/OUTPUT VARIABLES
-%      see 'WFObs_o.m' for the complete list.
-%   
 
 if sol_in.k == 1
     xk1k1 = [vec(sol_in.u(3:end-1,2:end-1)'); vec(sol_in.v(2:end-1,3:end-1)')];
@@ -25,6 +14,18 @@ end
 measuredData = sol_in.measuredData;
 
 if sol_in.k == 1
+    tur = Wp.turbine.N;
+    if strucObs.stateEst || strucObs.measFlow
+        stateLocArray = zeros(strucObs.size_output,2);
+        for iii = 1:strucObs.size_output
+            [~,loci,~]           = WFObs_s_sensors_nr2grid(iii,Wp.mesh);
+            stateLocArray(iii,:) = [loci.x, loci.y];
+        end
+    end
+    turbLocArray = zeros(Wp.turbine.N,2);
+    for iii = 1:Wp.turbine.N
+        turbLocArray(iii,:) = [Wp.turbine.Crx(iii),Wp.turbine.Cry(iii)];
+    end
     % Setup covariance and system output matrices
     if options.exportPressures
         strucObs.Pk    = sparse(eye(strucObs.size_state))*strucObs.P_0;
@@ -38,28 +39,57 @@ if sol_in.k == 1
         strucObs.Q_k   = strucObs.Q_k*eye(strucObs.size_output);
     end;
 end;
+Ck          = strucObs.Htt;
+[rC cC]     = size(Ck);
 
 % ExKF forecast update
-[solf,sysf]             = WFSim_timestepping( sol_in, sys_in, Wp, options ); % Forward propagation
+soltemp     = sol_in;
+soltemp.k   = soltemp.k - 1;
+[solf,sysf]	= WFSim_timestepping( soltemp, sys_in, Wp, options );       % Forward propagation
 
-if (sol_in.k == 1) || (rem(sol_in.k,5) == 0)
+% tic
+if (sol_in.k == 1) || (rem(sol_in.k,50) == 0)
     clear Fk Bk
     Fk(sysf.pRCM,sysf.pRCM) = sysf.A(sysf.pRCM,sysf.pRCM)\sysf.Al(sysf.pRCM,sysf.pRCM); % Linearized A-matrix at time k
     Bk(sysf.pRCM,:)         = sysf.A(sysf.pRCM,sysf.pRCM)\sysf.Bl(sysf.pRCM,:);         % Linearized B-matrix at time k
-    strucObs.Fk = Fk;
-    strucObs.Bk = Bk;
+    if ~options.exportPressures 
+        Fk     = Fk(1:strucObs.size_output,1:strucObs.size_output);
+        Bk     = Bk(1:strucObs.size_output,:);
+    end
+%     aa  = double(abs(Fk)>1e-4);
+%     p   = symrcm(aa);
+%      
+%     A       = Fk(p,p);
+%     Bk      = Bk(p,:);
+%     Ck      = Ck(:,p);
+%     state   = stateLocArray(p,:);
+%     
+%     strucObs.p      = p;
+%     strucObs.Fk     = A;
+%     strucObs.Bk     = Bk;
+%     strucObs.Ck     = Ck;
+%     strucObs.state  = state;
+    
+    strucObs.Fk     = Fk;
+    strucObs.Bk     = Bk;
+    strucObs.Ck     = Ck;
+    strucObs.state  = stateLocArray;
 end
-Fk = strucObs.Fk;
-Bk = strucObs.Bk;
-[rB cB] = size(Bk);
-Ck = strucObs.Htt;
-[rC cC] = size(Ck);
-Dk = zeros(rC,cB);
+% toc
+Fk      = strucObs.Fk;
+Bk      = strucObs.Bk;
+Ck      = strucObs.Ck;
+state   = strucObs.state;
+% p       = strucObs.p;
+
+n = length(Fk);
+p = [1:n];
+
+[rB cB]     = size(Bk);
+Dk          = zeros(rC,cB);
 
 % Neglect pressure terms
 if ~options.exportPressures 
-    Fk     = Fk(1:strucObs.size_output,1:strucObs.size_output);
-    Bk     = Bk(1:strucObs.size_output,:);
     solf.x = solf.x(1:strucObs.size_output);
 end;
 
@@ -73,47 +103,32 @@ lop     = length(strucObs.obs_array);
 RR      = strucObs.R_k*eye(lop,lop);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
-% Centralised Information Filter
-% tic
-% Pf = Fk*strucObs.Pk*Fk' + strucObs.Q_k;  % Covariance matrix P for x(k) knowing y(k-1)
-% Zkk1 = inv(Pf);
-% zkk1 = Zkk1*xkk1;
-% 
-% ik          = Ck'*inv(RR)*y;
-% Ik          = Ck'*inv(RR)*Ck;
-% zkk         = zkk1 + ik;
-% Zkk         = Zkk1 + Ik;
-% 
-% Pkk         = inv(Zkk);
-% xkk         = Pkk*zkk;
-% toc
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Distributed Information Filter
-tic
-type    = 4;       % CI = 0,1; EI = 2; ICI = 3, IFAC = 4
-typeCZ  = 2;       % 1 if Z = Co-Variance, 2 if Z = Information, 
-% [xkk Pkk]   = subsystem( Fk,Bk,Ck,Dk, y,xkk1,xk1k1,Sk1k1, QQ,RR, type );
-
-% [x,d,F,D,G,H,Q,R,y,l,n,x_est,x_unest] = subsystem_output(Fk,Bk,Ck,Dk,QQ,RR,y);
-tur = Wp.turbine.N;
-if strucObs.stateEst || strucObs.measFlow
-	stateLocArray = zeros(strucObs.size_output,2);
-    for iii = 1:strucObs.size_output
-        [~,loci,~]           = WFObs_s_sensors_nr2grid(iii,Wp.mesh);
-        stateLocArray(iii,:) = [loci.x, loci.y];
-    end
+% tic
+RD              = Wp.turbine.Drotor;
+Subsys_length   = strucObs.Subsys_length;
+type            = strucObs.fusion_type;
+typeCZ          = strucObs.typeCZ;
+if (sol_in.k == 1)
+    [x,d,p, F,D,G,H,Q,R,l,n,x_est,x_unest, P_unest] = subsystem_turbine(p,Fk,Bk,Ck,QQ,RR, tur,state,turbLocArray, Subsys_length,RD, Sk1k1);
+    strucObs.subsystem.x = x;           strucObs.subsystem.d = d;
+    strucObs.subsystem.F = F;           strucObs.subsystem.D = D;
+    strucObs.subsystem.G = G;           strucObs.subsystem.H = H;
+    strucObs.subsystem.Q = Q;           strucObs.subsystem.R = R;
+    strucObs.subsystem.l = l;           strucObs.subsystem.n = n;
+    strucObs.subsystem.x_est = x_est;   strucObs.subsystem.x_unest = x_unest;
+    strucObs.subsystem.P_unest = P_unest;
 end
+x       = strucObs.subsystem.x;         d       = strucObs.subsystem.d;
+F       = strucObs.subsystem.F;         D       = strucObs.subsystem.D;
+G       = strucObs.subsystem.G;         H       = strucObs.subsystem.H;
+Q       = strucObs.subsystem.Q;         R       = strucObs.subsystem.R;
+l       = strucObs.subsystem.l;         n       = strucObs.subsystem.n;
+x_est   = strucObs.subsystem.x_est;     x_unest = strucObs.subsystem.x_unest;
+P_unest = strucObs.subsystem.P_unest;
 
-turbLocArray = zeros(Wp.turbine.N,2);
-for iii = 1:Wp.turbine.N
-    turbLocArray(iii,:) = [Wp.turbine.Crx(iii),Wp.turbine.Cry(iii)];
-end
-    
-[x,d,p,pp, F,D,G,H,Q,R,y,l,n,x_est,x_unest, P_unest] = subsystem_turbine(Fk,Bk,Ck,QQ,RR,y, tur,stateLocArray,turbLocArray, Sk1k1);
-
-[xkk Pkk] = distributed_linear( x,d,p,pp,l,n, F,D,G,H,Q,R, y, xkk1,xk1k1,Sk1k1, x_est,x_unest, P_unest, type,typeCZ );
-toc
+[xkk Pkk] = distributed_linear( x,d,p,l,n, F,D,G,H,Q,R, y, xkk1,xk1k1,Sk1k1, x_est,x_unest, P_unest, type,typeCZ );
+% toc
 
 sol_out.x   = xkk;
 strucObs.Pk = Pkk; 

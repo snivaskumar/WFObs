@@ -2,10 +2,10 @@ clear all; close all; clc;
 %
 % exportFigsFromWorkspace.m
 %
-time_vec = [300];
+time_vec = [1800];
 plotError   = false; % Export final contour, centerline, power-time and error-time plots
 plotPower   = true;
-powerFC     = 600; % Plot x-seconds open-loop forecast
+powerFC     = 1800; % Plot x-seconds open-loop forecast
 plotContour = false;
 plotCline   = false;
 
@@ -20,9 +20,15 @@ options.Animate           = 1;  % Show results every x iterations (0: no plots)
    
 % Data sources
 data = {};
+% data{end+1} = struct(...
+%     'name','ExKF',...
+%     'path','/Users/Nivas_Kumar/Documents/NivasStudyMaterials/TUDelft/EnKF+WFSim/WFOBS - Queue/axi_2turb_alm_turb_ExKF/workspace.mat');
 data{end+1} = struct(...
-    'name','EnKF',...
-    'path','../../results/apc_EnKF/enkf_poorLmu_2/workspace.mat');
+    'name','UKF',...
+    'path','/Users/Nivas_Kumar/Documents/NivasStudyMaterials/TUDelft/EnKF+WFSim/WFOBS - Queue/axi_2turb_alm_turb_UKF/workspace.mat');
+% data{end+1} = struct(...
+%     'name','EnKF',...
+%     'path','../../results/apc_EnKF/enkf_poorLmu_2/workspace.mat');
 % data{end+1} = struct(...
 %     'name','ExKF',...
 %     'path','../../results/WE2017/axi_2turb_alm_turb_measFlow_exkf_stateEst/workspace.mat');

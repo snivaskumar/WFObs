@@ -2,65 +2,107 @@ clear all
 close all
 clc
 
-load('/Users/Nivas_Kumar/Desktop/2turb_C_Fk.mat');
+load('/Users/Nivas_Kumar/Desktop/9turb_noturb.mat');
 C = strucObs.Htt;
+tic
 aa = double(abs(Fk)>1e-4);
 p = symrcm(aa);
+toc
 A = Fk(p,p);
 Bk = Bk(p,:);
 Ck = C(:,p);
 
-[i,j] = find(Fk);
-bw = max(i-j) + 1
-[i,j] = find(A);
-bw = max(i-j) + 1
+% [i,j] = find(Fk);
+% bw = max(i-j) + 1
+% [i,j] = find(A);
+% bw = max(i-j) + 1
 
 state = stateLocArray(p,:);
-% state = stateLocArray;
 turbine = turbLocArray;
-turb1 = turbine(1,:);
-turb2 = turbine(2,:);
-d = sqrt( (turb2(1)-turb1(1))^2 + (turb2(2)-turb1(2))^2 )
 
-for i = 1:2137
-    d1(i) = sqrt( (state(i,1)-turb1(1))^2 + (state(i,2)-turb1(2))^2 );
-    d2(i) = sqrt( (state(i,1)-turb2(1))^2 + (state(i,2)-turb2(2))^2 );
-end
-% plot(d1),hold on, plot(d2), hold off
-x_ho = cell(2,1);
-x_ha = cell(2,1);
-pp = cell(2,1);
-pptmp = [];
-for i = 1:2137
-    if d1(i)<= (d/1)
-        x_ho{1} = [x_ho{1},i];
-        x_ha{1} = [x_ha{1};state(i,:)];
-        pp{1} = [pp{1},p(i)];
-    end
-    if d2(i)<= (d/1)
-        x_ho{2} = [x_ho{2},i];
-        x_ha{2} = [x_ha{2};state(i,:)];
-        pp{2} = [pp{2},p(i)];
-    end
-    if ( d1(i) > (d/1) ) && ( d2(i) > (d/1) )
-        pptmp = [pptmp;state(i,:)];
+n = length(A);
+d = cell(tur,1);
+parfor j = 1:tur
+    for i = 1:n
+        d{j}(i) = sqrt( (state(i,1)-turbine(j,1))^2 + (state(i,2)-turbine(j,2))^2 );
     end
 end
-% figure, plot(x_ho{1},x_ho{1},'o'), hold on, plot(x_ho{2},x_ho{2},'+'), hold off
+x = cell(tur,1);
+x_ha = cell(tur,1);
+pp = cell(tur,1);
 
-figure, plot(state(:,2),state(:,1),'+')
-hold on, plot(turb1(2),turb1(1),'s','LineWidth',2)
-hold on, plot(turb2(2),turb2(1),'s','LineWidth',2), hold off
+RD
+Subsys_length = 2;
+if Subsys_length <= 5
+    Subsys_length = Subsys_length*RD
+else
+    Subsys_length = Subsys_length
+end
+parfor j = 1:tur
+    for i = 1:n
+        if d{j}(i)<= (Subsys_length)
+            x{j} = [x{j},i];
+            x_ha{j} = [x_ha{j};state(i,:)];
+            pp{j} = [pp{j},p(i)];
+%         else
+%             pptmp = [pptmp;state(i,:)];
+        end
+    end
+    x{j} = x{j}';
+end
+figure, plot(state(:,2),state(:,1),'s') 
+for i = 1:tur
+    hold on,plot(turbine(i,2),turbine(i,1),'s','LineWidth',2)
+    hold on, plot(x_ha{i}(:,2),x_ha{i}(:,1),'+')
+    hold on, plot(turbine(i,2),turbine(i,1),'s','LineWidth',2)
+end
+hold off
+% plot(pptmp(:,2),pptmp(:,1),'*'), hold off
 xlabel('y-direction'),ylabel('x-direction');
-
-figure, plot(x_ha{1}(:,2),x_ha{1}(:,1),'+')
-hold on, plot(turb1(2),turb1(1),'s','LineWidth',2)
-hold on, plot(turb2(2),turb2(1),'s','LineWidth',2)
-hold on, plot(x_ha{2}(:,2),x_ha{2}(:,1),'s')
-hold on, plot(pptmp(:,2),pptmp(:,1),'*'), hold off
-xlabel('y-direction'),ylabel('x-direction');
-legend('States of subsystem-1','Turbine 1','Turbine 2','States of subsystem-2','Unestimated States')
+% legend('States of subsystem-1','Turbine 1','Turbine 2','States of subsystem-2','Unestimated States')
 title('Flow Field');
+
+% turb1 = turbine(1,:);
+% turb2 = turbine(2,:);
+% d = sqrt( (turb2(1)-turb1(1))^2 + (turb2(2)-turb1(2))^2 )
+% for i = 1:2137
+%     d1(i) = sqrt( (state(i,1)-turb1(1))^2 + (state(i,2)-turb1(2))^2 );
+%     d2(i) = sqrt( (state(i,1)-turb2(1))^2 + (state(i,2)-turb2(2))^2 );
+% end
+% % plot(d1),hold on, plot(d2), hold off
+% x_ho = cell(2,1);
+% x_ha = cell(2,1);
+% pp = cell(2,1);
+% pptmp = [];
+% for i = 1:2137
+%     if d1(i)<= (d/1)
+%         x_ho{1} = [x_ho{1},i];
+%         x_ha{1} = [x_ha{1};state(i,:)];
+%         pp{1} = [pp{1},p(i)];
+%     end
+%     if d2(i)<= (d/1)
+%         x_ho{2} = [x_ho{2},i];
+%         x_ha{2} = [x_ha{2};state(i,:)];
+%         pp{2} = [pp{2},p(i)];
+%     end
+%     if ( d1(i) > (d/1) ) && ( d2(i) > (d/1) )
+%         pptmp = [pptmp;state(i,:)];
+%     end
+% end
+% figure, plot(x_ho{1},x_ho{1},'o'), hold on, plot(x_ho{2},x_ho{2},'+'), hold off
+% figure, plot(state(:,2),state(:,1),'+')
+% hold on, plot(turb1(2),turb1(1),'s','LineWidth',2)
+% hold on, plot(turb2(2),turb2(1),'s','LineWidth',2), hold off
+% xlabel('y-direction'),ylabel('x-direction');
+% 
+% figure, plot(x_ha{1}(:,2),x_ha{1}(:,1),'+')
+% hold on, plot(turb1(2),turb1(1),'s','LineWidth',2)
+% hold on, plot(turb2(2),turb2(1),'s','LineWidth',2)
+% hold on, plot(x_ha{2}(:,2),x_ha{2}(:,1),'s')
+% hold on, plot(pptmp(:,2),pptmp(:,1),'*'), hold off
+% xlabel('y-direction'),ylabel('x-direction');
+% legend('States of subsystem-1','Turbine 1','Turbine 2','States of subsystem-2','Unestimated States')
+% title('Flow Field');
 
 %%
 

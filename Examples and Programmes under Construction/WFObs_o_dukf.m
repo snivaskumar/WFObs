@@ -13,7 +13,8 @@ turbLocArray = zeros(Wp.turbine.N,2);
 for iii = 1:Wp.turbine.N
     turbLocArray(iii,:) = [Wp.turbine.Crx(iii),Wp.turbine.Cry(iii)];
 end
-[x,d, tur,n, x_est,x_unest] = subsystem_turbine_nl(tur,stateLocArray,turbLocArray);
+Subsys_length = strucObs.Subsys_length;
+[x,d, tur,n, x_est,x_unest] = subsystem_turbine_nl(tur,stateLocArray,turbLocArray,Subsys_length);
     
 %% Initialization step of the Unscented KF (at k == 1)
 
@@ -117,7 +118,7 @@ strucObs.Aen(:,2:strucObs.L+1)   = strucObs.Aen(:,2:strucObs.L+1)   + Uscented_d
 strucObs.Aen(:,strucObs.L+2:end) = strucObs.Aen(:,strucObs.L+2:end) - Uscented_devs;
 
 %% Parallelized solving of the forward propagation step in the UKF
-tic
+% tic
 Aenf    = cell(tur,1);
 Yenf    = cell(tur,1);
 L       = strucObs.L;
@@ -214,10 +215,10 @@ end
 %         Yenf(:,ji) = [solpar.x(strucObs.obs_array)];
 %     end    
 % end
-toc
+% toc
 
 %% Analysis update of the Unscented KF
-tic
+% tic
 if strucObs.measPw
     y_meas = [sol.measuredData.sol(strucObs.obs_array);sol.measuredData.power];
 else
@@ -242,7 +243,7 @@ parfor i=1:tur
     z{i}    = xmean + Kk*(y_meas-ymean);
     Z{i}    = Pfxxk - Kk * Pfyyk * Kk';
 end
-toc
+% toc
 typeCZ = 1;       % 1 if Z = Co-Variance, 2 if Z = Information, 
 [xtmp,Ptmp] = fuze(z,Z,x,tur,L,x_est,typeCZ);
 z{i};

@@ -1,31 +1,38 @@
-function [xkk Pkk] = distributed_linear( x,d,p,pp,hr,n, F,D,G,H,Q,R, y, xkk1,xk1k1,Sk1k1, x_est,x_unest, P_unest, type,typeCZ );
+function [xkk Pkk] = distributed_linear( x,d,p,hr,n, F,D,G,H,Q,R, yy, xkk1,xk1k1,Sk1k1, x_est,x_unest, P_unest, type,typeCZ );
 % [xkk Pkk] = distributed_linear( x,d,F,D,G,H,Q,R, y, xkk1,xk1k1,Sk1k1, type );
-
-xkk1    = xkk1(p);
-xk1k1   = xk1k1(p);
-Sk1k1   = Sk1k1(p,p);
-[Y,I] = sort(p);
+% tic
+% xkk1    = xkk1(p);
+% xk1k1   = xk1k1(p);
+% Sk1k1   = Sk1k1(p,p);
+% [Y,I] = sort(p);
+% toc
 
 % Prediction
 Slff = cell(hr,1);
 Slfd = cell(hr,1);
 Sldd = cell(hr,1);
+% tic
 for i = 1:hr
     Slff{i} = Sk1k1( x{i},x{i} );            % Sff(k-1/k-1)_l
     Slfd{i} = Sk1k1( x{i},d{i} );            % Sfd(k-1/k-1)_l
     Sldd{i} = Sk1k1( d{i},d{i} );            % Sdd(k-1/k-1)_l
 end
+% toc
 
 % S(k/k-1)_l
 Slkk1 = cell(hr,1);
 Zlkk1 = cell(hr,1);
 xlkk1 = cell(hr,1);
-tic
+% tic
 parfor i = 1:hr
-    xlkk1{i} = xkk1(x{i});
-    Slkk1{i} = F{i}*Slff{i}*F{i}' + F{i}*Slfd{i}*D{i}' + (F{i}*Slfd{i}*D{i}')' + D{i}*Sldd{i}*D{i}' + Q{i};
+    xlkk1{i}    = xkk1(x{i});
+    Slkk1{i}    = F{i}*Slff{i}*F{i}'...
+                + F{i}*Slfd{i}*D{i}'...
+                + (F{i}*Slfd{i}*D{i}')'...
+                + D{i}*Sldd{i}*D{i}' + Q{i};
+    y{i}        = yy( : );
 end
-toc
+% toc
 
 %% Information Filter (Update)
 
@@ -62,7 +69,7 @@ if typeCZ == 1
     dy      = cell(hr,1);
     Slkk    = cell(hr,1);
     parfor i = 1:hr
-        dy{i}           = y{i} - H{i}(:,x{i})*xlkk1{i};
+        dy{i}           = y{i} - H{i}*xlkk1{i};
         P_yy{i}         = R{i} + H{i}*Slkk1{i}*H{i}';
         P_xy{i}         = Slkk1{i}*H{i}';
         K{i}            = P_xy{i}*pinv(P_yy{i});
@@ -76,40 +83,11 @@ end
 %% Data Fusion
 % CI,EI,ICI,IFAC - Information Matrix
 
-tic
+% tic
 nnn = hr;
 zf = zlkk;
 Pf = Zlkk;
 xf = x;
-
-% xf      = cell(hr,1);
-% zf      = cell(hr,1);
-% xftmp   = cell(hr,1);
-% Pf      = cell(hr,1);
-% Pftmp   = cell(hr,1);
-% for i = 1:hr
-%     xf{i}               = union(x{i},x_unest);
-%     
-%     Pftmp{i}                    = 5*eye(n,n);
-%     Pftmp{i}(x{i},x{i})         = Zlkk{i};
-%     if typeCZ == 1
-%         Pftmp{i}(x_unest,x_unest)   = inv(P_unest);
-%     else
-%         Pftmp{i}(x_unest,x_unest)   = P_unest;
-%     end
-%     Pf{i}                       = Pftmp{i}(xf{i},xf{i});
-%     
-%     xftmp{i}                    = zeros(n,1);
-%     xftmp{i}(x{i})              = zlkk{i};
-%     if typeCZ == 1
-%         xftmp{i}(x_unest)           = Pftmp{i}(x_unest,x_unest)*xkk1(x_unest);
-%     else
-%         xftmp{i}(x_unest)           = xkk1(x_unest);
-%     end
-%     zf{i}                       = xftmp{i}(xf{i});
-% end
-% x_est = [1:n]';
-
 if type ~= 4 
     type;
     zfkk = cell(ceil(hr/2),1);
@@ -168,7 +146,7 @@ if type ~= 4
             nnn = nnn;
         end
     end
-    toc
+%     toc
     if typeCZ == 1
         Ptmp            = Pkk;
         xtmp            = zkk;
@@ -184,15 +162,11 @@ end
 Pkk             = 5*eye(n,n);
 Pkk(x_est,x_est)= Ptmp;
 
-% Pkk( x_unest,x_unest ) =  P_unest;
-
 xkk             = zeros(n,1);
 xkk(x_est)      = xtmp;
 xkk(x_unest)    = xkk1(x_unest);
 
-% Pkk = Ptmp;
-% xkk = xtmp;
-
-Pkk = Pkk(I,I);
-xkk = xkk(I);
+% Pkk = Pkk(I,I);
+% xkk = xkk(I);
+% toc
 

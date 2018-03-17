@@ -19,7 +19,7 @@ scriptOptions.Animate           = 0;  % Show results every x iterations (0: no p
    scriptOptions.plotCenterline = 0;  % Plot centerline speed of the wake (m/s)
 
 % Saving settings
-scriptOptions.savePlots         = 0;  % Save all plots in external files at each time step
+scriptOptions.savePlots         = 1;  % Save all plots in external files at each time step
 scriptOptions.saveWorkspace     = 1;  % Save complete workspace at the end of simulation
 
 

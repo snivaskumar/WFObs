@@ -33,8 +33,18 @@ end;
 soltemp   = sol_in;
 soltemp.k = soltemp.k - 1;
 [solf,sysf]             = WFSim_timestepping( soltemp, sys_in, Wp, options );       % Forward propagation
-Fk(sysf.pRCM,sysf.pRCM) = sysf.A(sysf.pRCM,sysf.pRCM)\sysf.Al(sysf.pRCM,sysf.pRCM); % Linearized A-matrix at time k
-Bk(sysf.pRCM,:)         = sysf.A(sysf.pRCM,sysf.pRCM)\sysf.Bl(sysf.pRCM,:);         % Linearized B-matrix at time k
+% Fk(sysf.pRCM,sysf.pRCM) = sysf.A(sysf.pRCM,sysf.pRCM)\sysf.Al(sysf.pRCM,sysf.pRCM); % Linearized A-matrix at time k
+% Bk(sysf.pRCM,:)         = sysf.A(sysf.pRCM,sysf.pRCM)\sysf.Bl(sysf.pRCM,:);         % Linearized B-matrix at time k
+
+if (sol_in.k == 1) || (rem(sol_in.k,5) == 0)
+    clear Fk Bk
+    Fk(sysf.pRCM,sysf.pRCM) = sysf.A(sysf.pRCM,sysf.pRCM)\sysf.Al(sysf.pRCM,sysf.pRCM); % Linearized A-matrix at time k
+    Bk(sysf.pRCM,:)         = sysf.A(sysf.pRCM,sysf.pRCM)\sysf.Bl(sysf.pRCM,:);         % Linearized B-matrix at time k
+    strucObs.Fk = Fk;
+    strucObs.Bk = Bk;
+end
+Fk = strucObs.Fk;
+Bk = strucObs.Bk;
 
 % Neglect pressure terms
 if ~options.exportPressures 

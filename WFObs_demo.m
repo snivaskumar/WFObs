@@ -73,10 +73,12 @@ scriptOptions.saveWorkspace     = 1;  % Save complete workspace at the end of si
 scriptOptions.savePath          = ['/Users/Nivas_Kumar/Documents/NivasStudyMaterials/TUDelft/EnKF+WFSim/WFObs/results/tmp']; % Destination folder of saved files
 
 % Configuration file
-configName = 'axi_2turb_alm_turb'; % See './configurations' for options
-
+configName = 'apc_9turb_alm_turb_EnKF';
+% configName = 'axi_2turb_alm_turb';
+% axi_2turb_alm_turb_dexkf_IFAC1DZ = axi_2turb_alm_turb + dexkf + fusion: IFAC
+% + subsystem_length: 1D + typeCZ: Z
 %% Execute the WFObs core code (+ overwrite meshing.m settings, if applicable)
 WpOverwrite = struct(); % Struct to overwrite settings from meshing.m
-WpOverwrite.sim.NN = 1500; % Stop after [x] steps
+WpOverwrite.sim.NN = 999; % Stop after [x] steps
 run('WFObs_addpaths.m'); % Import libraries for WFObs & WFSim
 outputData = WFObs_core(scriptOptions,configName,WpOverwrite);
