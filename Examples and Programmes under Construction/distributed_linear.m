@@ -146,7 +146,6 @@ if type ~= 4
             nnn = nnn;
         end
     end
-%     toc
     if typeCZ == 1
         Ptmp            = Pkk;
         xtmp            = zkk;

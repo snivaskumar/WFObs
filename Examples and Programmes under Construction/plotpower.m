@@ -44,7 +44,7 @@ subplotDim = numSubplots(Wp.turbine.N); % Determine optimal layout for subplots
 for j = 1:Wp.turbine.N
     subplot(subplotDim(1),subplotDim(2),j);
     if plotLES == 1
-        plot(timeLES,pwLES(j,:),'k-','lineWidth',0.25,'DisplayName', ['LES']); hold on
+        plot(timeLES,pwLES(j,:),'k-','lineWidth',0.5,'DisplayName', ['LES']); hold on
     end
     plot(timeWFSim,pwWFSim(j,:),'-','lineWidth',1.0,'DisplayName', ['WFObs: ' strucObs.filtertype]); hold on;
     if scriptOptions.powerForecast > 0 && length(timeFC) > 0

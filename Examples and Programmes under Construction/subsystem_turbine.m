@@ -27,7 +27,6 @@ end
 % toc
 x = cell(tur,1);
 x_ha = cell(tur,1);
-% pp = cell(tur,1);
 
 RD;
 if Subsys_length <= 5
@@ -43,7 +42,6 @@ parfor j = 1:tur
         if d{j}(i)<= (Subsys_length)
             x{j} = [x{j},i];
             x_ha{j} = [x_ha{j};state(i,:)];
-%             pp{j} = [pp{j},p(i)];
         end
     end
     x{j} = x{j}';

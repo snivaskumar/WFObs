@@ -1,6 +1,30 @@
 function [Wp,sol_out,strucObs] = WFObs_o_dexkf(strucObs,Wp,sys_in,sol_in,options)
 
 if sol_in.k == 1
+    if strucObs.fusion_type == 0     % CI = 0,1; EI = 2; ICI = 3, IFAC = 4
+        disp('Type of fusion: CI (Naive Method)')
+    elseif strucObs.fusion_type == 1
+        disp('Type of fusion: CI')
+    elseif strucObs.fusion_type == 2
+        disp('Type of fusion: EI')
+    elseif strucObs.fusion_type == 3
+        disp('Type of fusion: ICI')   
+    else
+        disp('Type of fusion: IFAC')
+    end
+    if strucObs.typeCZ == 1         % 1 if Z = Co-Variance, 2 if Z = Information
+        disp('Type of filter: Conv. KF')
+    else
+        disp('Type of filter: Info. KF')
+    end
+    if strucObs.Subsys_length <= 5
+        fprintf('Subsystem Length: %.2d\n',strucObs.Subsys_length*Wp.turbine.Drotor);
+    else
+        fprintf('Subsystem Length: %d\n',strucObs.Subsys_length);
+    end
+end
+
+if sol_in.k == 1
     xk1k1 = [vec(sol_in.u(3:end-1,2:end-1)'); vec(sol_in.v(2:end-1,3:end-1)')];
     if options.exportPressures == 1 % Optional: add pressure terms
         xk1k1 = [xk1k1; vec(sol_in.p(2:end-1,2:end-1)')];

@@ -53,7 +53,7 @@ switch lower(strucObs.filtertype)
                                 % Subsys_length = 4  if Subsys_length = 4D
                                 % Subsys_length = x  if Subsys_length = x
         strucObs.fusion_type    = 4;        % CI = 0,1; EI = 2; ICI = 3, IFAC = 4
-        strucObs.typeCZ         = 2;        % 1 if Z = Co-Variance, 2 if Z = Information
+        strucObs.typeCZ         = 1;        % 1 if Z = Co-Variance, 2 if Z = Information
         
     % Distributed Unscented Kalman filter (UKF)    
     case {'dukf'}
