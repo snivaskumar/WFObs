@@ -52,7 +52,8 @@ soltemp.k   = soltemp.k - 1;
 [solf,sysf]	= WFSim_timestepping( soltemp, sys_in, Wp, options );       % Forward propagation
 
 % tic
-if (sol_in.k == 1) || (rem(sol_in.k,50) == 0)
+if (sol_in.k == 1) 
+%     || (rem(sol_in.k,50) == 0)
     clear Fk Bk
     Fk(sysf.pRCM,sysf.pRCM) = sysf.A(sysf.pRCM,sysf.pRCM)\sysf.Al(sysf.pRCM,sysf.pRCM); % Linearized A-matrix at time k
     Bk(sysf.pRCM,:)         = sysf.A(sysf.pRCM,sysf.pRCM)\sysf.Bl(sysf.pRCM,:);         % Linearized B-matrix at time k
@@ -106,8 +107,6 @@ QQ      = strucObs.Q_k;
 lop     = length(strucObs.obs_array);
 RR      = strucObs.R_k*eye(lop,lop);
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Distributed Information Filter
 % tic
 RD              = Wp.turbine.Drotor;
 Subsys_length   = strucObs.Subsys_length;
