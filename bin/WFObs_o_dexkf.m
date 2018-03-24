@@ -136,8 +136,9 @@ RD              = Wp.turbine.Drotor;
 Subsys_length   = strucObs.Subsys_length;
 type            = strucObs.fusion_type;
 typeCZ          = strucObs.typeCZ;
-if (sol_in.k == 1)
-    [x,d,p, F,D,G,H,Q,R,l,n,x_est,x_unest, P_unest] = subsystem_turbine(p,Fk,Bk,Ck,QQ,RR, tur,state,turbLocArray, Subsys_length,RD, Sk1k1);
+if (sol_in.k == 1) 
+%     || (rem(sol_in.k,50) == 0)
+    [x,d,p, F,D,G,H,Q,R,l,n,x_est,x_unest, P_unest] = subsystem_turbine(sol_in, p,Fk,Bk,Ck,QQ,RR, tur,state,turbLocArray, Subsys_length,RD, Sk1k1);
     strucObs.subsystem.x = x;           strucObs.subsystem.d = d;
     strucObs.subsystem.F = F;           strucObs.subsystem.D = D;
     strucObs.subsystem.G = G;           strucObs.subsystem.H = H;

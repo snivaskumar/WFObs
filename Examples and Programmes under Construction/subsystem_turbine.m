@@ -1,4 +1,4 @@
-function [x,d,p, F,D,G,H,Q,R, tur,n, x_est,x_unest, P_unest] = subsystem_turbine(p,Fk,Bk,C,QQ,RR, tur,state,turbLocArray, Subsys_length,RD, Sk1k1);
+function [x,d,p, F,D,G,H,Q,R, tur,n, x_est,x_unest, P_unest] = subsystem_turbine(sol_in, p,Fk,Bk,C,QQ,RR, tur,state,turbLocArray, Subsys_length,RD, Sk1k1);
 % [x,d, F,D,G,H,Q,R,y, tur,n, x_est,x_unest, P_unest] = subsystem_turbine(Fk,Bk,C,QQ,RR,yy, tur,stateLocArray,turbLocArray, Sk1k1);
 
 % Model Decomposition
@@ -16,59 +16,61 @@ state   = state;
 % toc
 n = length(Fk);
 
-turbine = turbLocArray;
-d = cell(tur,1);
-% tic
-parfor j = 1:tur
-    for i = 1:n
-        d{j}(i) = sqrt( (state(i,1)-turbine(j,1))^2 + (state(i,2)-turbine(j,2))^2 );
-    end
-end
-% toc
-x = cell(tur,1);
-x_ha = cell(tur,1);
-
-RD;
-if Subsys_length <= 5
-    Subsys_length = Subsys_length*RD;
-else
-    Subsys_length = Subsys_length;
-end
-Subsys_length;
-
-% tic
-parfor j = 1:tur
-    for i = 1:n
-        if d{j}(i)<= (Subsys_length)
-            x{j} = [x{j},i];
-            x_ha{j} = [x_ha{j};state(i,:)];
+if sol_in.k == 1
+    turbine = turbLocArray;
+    d = cell(tur,1);
+    % tic
+    parfor j = 1:tur
+        for i = 1:n
+            d{j}(i) = sqrt( (state(i,1)-turbine(j,1))^2 + (state(i,2)-turbine(j,2))^2 );
         end
     end
-    x{j} = x{j}';
-end
-% toc
+    % toc
+    x = cell(tur,1);
+    x_ha = cell(tur,1);
 
-x_est = x{1};
-for i = 2:tur
-    x_est = union( x_est, x{i} );
-end
-x_unest = setdiff([1:n],x_est)';
-size(A);
-length(x_est);
-length(x_unest);
+    RD;
+    if Subsys_length <= 5
+        Subsys_length = Subsys_length*RD;
+    else
+        Subsys_length = Subsys_length;
+    end
+    Subsys_length;
 
-d = cell(tur,1);
-% tic
-for i = 1:tur
-    clear rtmp ctmp tmp
-    tmp         = setdiff(x_est,x{i});
-    [rtmp ctmp] = find( A(x{i},tmp) );
-    ctmp        = unique(ctmp);
-    d{i}        = [d{i}, tmp(ctmp)];
-end
-% toc
-for i = 1:tur
-    d{i} = unique(d{i});
+    % tic
+    parfor j = 1:tur
+        for i = 1:n
+            if d{j}(i)<= (Subsys_length)
+                x{j} = [x{j},i];
+                x_ha{j} = [x_ha{j};state(i,:)];
+            end
+        end
+        x{j} = x{j}';
+    end
+    % toc
+
+    x_est = x{1};
+    for i = 2:tur
+        x_est = union( x_est, x{i} );
+    end
+    x_unest = setdiff([1:n],x_est)';
+    size(A);
+    length(x_est);
+    length(x_unest);
+
+    d = cell(tur,1);
+    % tic
+    for i = 1:tur
+        clear rtmp ctmp tmp
+        tmp         = setdiff(x_est,x{i});
+        [rtmp ctmp] = find( A(x{i},tmp) );
+        ctmp        = unique(ctmp);
+        d{i}        = [d{i}, tmp(ctmp)];
+    end
+    % toc
+    for i = 1:tur
+        d{i} = unique(d{i});
+    end
 end
 
 %% Sub-Systems

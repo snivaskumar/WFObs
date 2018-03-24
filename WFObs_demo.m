@@ -70,7 +70,8 @@ scriptOptions.Animate           = 10;  % Show results every x iterations (0: no 
 % Saving settings
 scriptOptions.savePlots         = 1;  % Save all plots in external files at each time step
 scriptOptions.saveWorkspace     = 1;  % Save complete workspace at the end of simulation
-scriptOptions.savePath          = ['/Users/Nivas_Kumar/Documents/NivasStudyMaterials/TUDelft/EnKF+WFSim/WFObs/results/tmp']; % Destination folder of saved files
+% scriptOptions.savePath          = ['/Users/Nivas_Kumar/Documents/NivasStudyMaterials/TUDelft/EnKF+WFSim/WFObs/results/tmp']; % Destination folder of saved files
+scriptOptions.savePath          = ['C:\Users\Nivas Temp\Documents\Nivas\MSc Thesis\WFObs\results\tmp']; % Destination folder of saved files
 
 % Configuration file
 % configName = 'apc_9turb_alm_turb_dexkf_IFAC1DZ';
@@ -80,6 +81,6 @@ configName = 'axi_2turb_alm_turb';
 % + subsystem_length: 1D + typeCZ: Z
 %% Execute the WFObs core code (+ overwrite meshing.m settings, if applicable)
 WpOverwrite = struct(); % Struct to overwrite settings from meshing.m
-WpOverwrite.sim.NN = 1975; % Stop after [x] steps
+WpOverwrite.sim.NN = 500; % Stop after [x] steps
 run('WFObs_addpaths.m'); % Import libraries for WFObs & WFSim
 outputData = WFObs_core(scriptOptions,configName,WpOverwrite);
