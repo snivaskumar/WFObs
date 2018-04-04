@@ -21,7 +21,6 @@ end
 
 % S(k/k-1)_l
 Slkk1 = cell(hr,1);
-Zlkk1 = cell(hr,1);
 xlkk1 = cell(hr,1);
 % tic
 parfor i = 1:hr
@@ -36,24 +35,18 @@ end
 
 %% Information Filter (Update)
 
-% Z(k/k-1)_l, z(k/k-1)_l
-zlkk1 = cell(hr,1);
-parfor i = 1:hr
-    Zlkk1{i} = inv(Slkk1{i});
-    zlkk1{i} = Zlkk1{i}*xlkk1{i};
-end
-
 if typeCZ == 2
-    inff = cell(hr,1);
-    INFF = cell(hr,1);
-    parfor i = 1:hr
-        inff{i} = H{i}'*inv(R{i})*y{i};
-        INFF{i} = H{i}'*inv(R{i})*H{i};
-    end
-    
+    Zlkk1 = cell(hr,1);     inff = cell(hr,1);
+    zlkk1 = cell(hr,1);     INFF = cell(hr,1);
     Zlkk = cell(hr,1);
     zlkk = cell(hr,1);
     parfor i = 1:hr
+        Zlkk1{i} = inv(Slkk1{i});
+        zlkk1{i} = Zlkk1{i}*xlkk1{i};
+        
+        INFF{i} = H{i}'*inv(R{i})*H{i};
+        inff{i} = H{i}'*inv(R{i})*y{i};
+        
         Zlkk{i} = Zlkk1{i} + INFF{i};
         zlkk{i} = zlkk1{i} + inff{i};
     end

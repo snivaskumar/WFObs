@@ -19,8 +19,11 @@ strucObs.loadRandomSeed = true; % Load a predefined random seed (for one-to-one 
 strucObs.noise_obs      = 0.1;  % Disturbance amplitude (m/s) in output data by randn*noiseampl ('0' for no noise)
 strucObs.noise_init     = 0.0;  % Disturbance amplitude (m/s) in initial flow field by randn*noiseinit ('0' recommended)
 
+% strucObs.noise_obs      = 1;
+% strucObs.noise_init     = 1;
+
 % Estimate freestream conditions
-strucObs.U_Inf.estimate  = true;  % Estimate freestream (inflow) u_Inf and v_Inf
+strucObs.U_Inf.estimate  = false;  % Estimate freestream (inflow) u_Inf and v_Inf
 strucObs.U_Inf.intFactor = 0.99;  % LPF gain (1: do not change, 0: instant change)
    
 % Measurement definitions
@@ -54,7 +57,11 @@ switch lower(strucObs.filtertype)
                                 % Subsys_length = x  if Subsys_length = x
         strucObs.fusion_type    = 4;        % CI = 0,1; EI = 2; ICI = 3, IFAC = 4
         strucObs.typeCZ         = 1;        % 1 if Z = Co-Variance, 2 if Z = Information
-        
+        strucObs.linearize_freq = Inf;       % 50 if linearize the non-linear system every 50 iterations
+                                            % 100 if linearize the non-linear system every 100 iterations
+                                            % N if linearize the non-linear system every N iterations
+                                            % Inf if linearize the non-linear system only at the first iteration
+                                            
     % Distributed Unscented Kalman filter (UKF)    
     case {'dukf'}
         % General settings

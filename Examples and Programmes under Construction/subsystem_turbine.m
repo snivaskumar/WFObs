@@ -1,4 +1,4 @@
-function [x,d,p, F,D,G,H,Q,R, tur,n, x_est,x_unest, P_unest] = subsystem_turbine(sol_in, p,Fk,Bk,C,QQ,RR, tur,state,turbLocArray, Subsys_length,RD, Sk1k1);
+function [x,d,p, F,D,G,H,Q,R, tur,n, x_est,x_unest, P_unest] = subsystem_turbine(strucObs,sol_in, p,Fk,Bk,C,QQ,RR, tur,state,turbLocArray, Subsys_length,RD, Sk1k1);
 % [x,d, F,D,G,H,Q,R,y, tur,n, x_est,x_unest, P_unest] = subsystem_turbine(Fk,Bk,C,QQ,RR,yy, tur,stateLocArray,turbLocArray, Sk1k1);
 
 % Model Decomposition
@@ -27,7 +27,7 @@ if sol_in.k == 1
     end
     % toc
     x = cell(tur,1);
-    x_ha = cell(tur,1);
+    x_pos = cell(tur,1);
 
     RD;
     if Subsys_length <= 5
@@ -42,7 +42,7 @@ if sol_in.k == 1
         for i = 1:n
             if d{j}(i)<= (Subsys_length)
                 x{j} = [x{j},i];
-                x_ha{j} = [x_ha{j};state(i,:)];
+                x_pos{j} = [x_pos{j};state(i,:)];
             end
         end
         x{j} = x{j}';
@@ -71,8 +71,11 @@ if sol_in.k == 1
     for i = 1:tur
         d{i} = unique(d{i});
     end
+    strucObs.subsystem.x = x;           strucObs.subsystem.d = d;
+    strucObs.subsystem.x_est = x_est;   strucObs.subsystem.x_unest = x_unest;
 end
-
+x       = strucObs.subsystem.x;         d       = strucObs.subsystem.d;
+x_est   = strucObs.subsystem.x_est;     x_unest = strucObs.subsystem.x_unest;
 %% Sub-Systems
 
 F   = cell(tur,1);                 % Local A

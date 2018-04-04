@@ -12,7 +12,8 @@ scriptOptions.plotPower = 1;
 scriptOptions.plotError = 1;
 scriptOptions.plotCenterline = 1;
 scriptOptions.powerForecast = 1;
-scriptOptions.savePath = '/Users/Nivas_Kumar/Documents/NivasStudyMaterials/TUDelft/EnKF+WFSim/WFOBS - Queue';
+% scriptOptions.savePath = '/Users/Nivas_Kumar/Documents/NivasStudyMaterials/TUDelft/EnKF+WFSim/WFOBS - Queue';
+scriptOptions.savePath = 'C:\Users\Nivas Temp\Documents\Nivas\MSc Thesis\WFObs\results\tmp';
 
 % Import variables
 sol          = sol_array(end); 

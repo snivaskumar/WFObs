@@ -1,4 +1,10 @@
 clear all; close all; clc;
+%% Parallel Pool
+myCluster = parcluster('local');
+N_pool = myCluster.NumWorkers;
+if isempty(gcp('nocreate')) ~= 0
+    parpool(N_pool);
+end
 
 %% Batch job code
 %  Summary:

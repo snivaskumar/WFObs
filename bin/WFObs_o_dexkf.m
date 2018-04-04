@@ -18,9 +18,14 @@ if sol_in.k == 1
         disp('Type of filter: Info. KF')
     end
     if strucObs.Subsys_length <= 5
-        fprintf('Subsystem Length: %.2d\n',strucObs.Subsys_length*Wp.turbine.Drotor);
+        fprintf('Subsystem Length: %dD (= %.2d)\n',strucObs.Subsys_length,strucObs.Subsys_length*Wp.turbine.Drotor);
     else
         fprintf('Subsystem Length: %d\n',strucObs.Subsys_length);
+    end
+    if strucObs.linearize_freq == Inf
+        fprintf('System is linearized only at the first iteration.\n');
+    else
+        fprintf('System is linearized every %d iterations.\n',strucObs.linearize_freq);
     end
 end
 
@@ -35,10 +40,9 @@ else
 end
         
 % Import measurement data variable
-measuredData = sol_in.measuredData;
-
+measuredData    = sol_in.measuredData;
+tur             = Wp.turbine.N;
 if sol_in.k == 1
-    tur = Wp.turbine.N;
     if strucObs.stateEst || strucObs.measFlow
         stateLocArray = zeros(strucObs.size_output,2);
         for iii = 1:strucObs.size_output
@@ -50,6 +54,7 @@ if sol_in.k == 1
     for iii = 1:Wp.turbine.N
         turbLocArray(iii,:) = [Wp.turbine.Crx(iii),Wp.turbine.Cry(iii)];
     end
+    strucObs.turbine = turbLocArray;
     strucObs.state = stateLocArray;
 end
 
@@ -75,9 +80,9 @@ soltemp     = sol_in;
 soltemp.k   = soltemp.k - 1;
 [solf,sysf]	= WFSim_timestepping( soltemp, sys_in, Wp, options );       % Forward propagation
 
+NL = strucObs.linearize_freq;
 % tic
-if (sol_in.k == 1) 
-%     || (rem(sol_in.k,50) == 0)
+if (sol_in.k == 1) || (rem(sol_in.k,NL) == 0)
     clear Fk Bk
     Fk(sysf.pRCM,sysf.pRCM) = sysf.A(sysf.pRCM,sysf.pRCM)\sysf.Al(sysf.pRCM,sysf.pRCM); % Linearized A-matrix at time k
     Bk(sysf.pRCM,:)         = sysf.A(sysf.pRCM,sysf.pRCM)\sysf.Bl(sysf.pRCM,:);         % Linearized B-matrix at time k
@@ -136,9 +141,8 @@ RD              = Wp.turbine.Drotor;
 Subsys_length   = strucObs.Subsys_length;
 type            = strucObs.fusion_type;
 typeCZ          = strucObs.typeCZ;
-if (sol_in.k == 1) 
-%     || (rem(sol_in.k,50) == 0)
-    [x,d,p, F,D,G,H,Q,R,l,n,x_est,x_unest, P_unest] = subsystem_turbine(sol_in, p,Fk,Bk,Ck,QQ,RR, tur,state,turbLocArray, Subsys_length,RD, Sk1k1);
+if (sol_in.k == 1) || (rem(sol_in.k,NL) == 0)
+    [x,d,p, F,D,G,H,Q,R,l,n,x_est,x_unest, P_unest] = subsystem_turbine(strucObs,sol_in, p,Fk,Bk,Ck,QQ,RR, tur,state,strucObs.turbine, Subsys_length,RD, Sk1k1);
     strucObs.subsystem.x = x;           strucObs.subsystem.d = d;
     strucObs.subsystem.F = F;           strucObs.subsystem.D = D;
     strucObs.subsystem.G = G;           strucObs.subsystem.H = H;
