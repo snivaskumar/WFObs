@@ -1,4 +1,4 @@
-function [xkk Pkk] = distributed_linear( x,d,p,hr,n, F,D,G,H,Q,R, yy, xkk1,xk1k1,Sk1k1, x_est,x_unest, P_unest, type,typeCZ );
+function [xkk Pkk] = distributed_linear( x,d,p,hr,n, F,D,E,G,H,Q,R, yy, xkk1,xk1k1,Sk1k1, x_est,x_unest, P_unest, type,typeCZ );
 % [xkk Pkk] = distributed_linear( x,d,F,D,G,H,Q,R, y, xkk1,xk1k1,Sk1k1, type );
 % tic
 % xkk1    = xkk1(p);
@@ -11,11 +11,21 @@ function [xkk Pkk] = distributed_linear( x,d,p,hr,n, F,D,G,H,Q,R, yy, xkk1,xk1k1
 Slff = cell(hr,1);
 Slfd = cell(hr,1);
 Sldd = cell(hr,1);
+
+% Slee = cell(hr,1);
+% Slfe = cell(hr,1);
+% Slde = cell(hr,1);
+% Slee_tmp = Sk1k1( x_unest,x_unest );
 % tic
 for i = 1:hr
     Slff{i} = Sk1k1( x{i},x{i} );            % Sff(k-1/k-1)_l
     Slfd{i} = Sk1k1( x{i},d{i} );            % Sfd(k-1/k-1)_l
     Sldd{i} = Sk1k1( d{i},d{i} );            % Sdd(k-1/k-1)_l
+    
+%     Slee{i} = Slee_tmp;
+% % %     Slee{i} = Sk1k1( x_unest,x_unest );
+%     Slfe{i} = Sk1k1( x{i},x_unest );
+%     Slde{i} = Sk1k1( d{i},x_unest );
 end
 % toc
 
@@ -25,10 +35,28 @@ xlkk1 = cell(hr,1);
 % tic
 parfor i = 1:hr
     xlkk1{i}    = xkk1(x{i});
-    Slkk1{i}    = F{i}*Slff{i}*F{i}'...
-                + F{i}*Slfd{i}*D{i}'...
-                + (F{i}*Slfd{i}*D{i}')'...
-                + D{i}*Sldd{i}*D{i}' + Q{i};
+%     Slkk1{i}    = F{i}*Slff{i}*F{i}'...
+%                 + F{i}*Slfd{i}*D{i}'...
+%                 + (F{i}*Slfd{i}*D{i}')'...
+%                 + D{i}*Sldd{i}*D{i}' + Q{i};
+            
+%     Slkk1{i}    = F{i}*Slff{i}*F{i}'...
+%                 + F{i}*Slfd{i}*D{i}'...
+%                 + (F{i}*Slfd{i}*D{i}')'...
+%                 + D{i}*Sldd{i}*D{i}' + Q{i}...
+%                 + F{i}*Slfe{i}*E{i}' + (F{i}*Slfe{i}*E{i}')'...
+%                 + D{i}*Slde{i}*E{i}' + (D{i}*Slde{i}*E{i}')'...
+%                 + E{i}*Slee{i}*E{i}';
+
+    S1 = F{i}*Slff{i}*F{i}';    S2 = F{i}*Slfd{i}*D{i}';
+    S3 = D{i}*Sldd{i}*D{i}';    %S4 = D{i}*Slde{i}*E{i}';
+%     S5 = E{i}*Slee{i}*E{i}';    S6 = F{i}*Slfe{i}*E{i}';
+    
+    Slkk1{i} = S1 + S2 + S2' + S3 + Q{i};    
+%     Slkk1{i} = S1 + S2 + S2'...
+%              + S3 + S4 + S4'...
+%              + S5 + S6 + S6' + Q{i};
+            
     y{i}        = yy( : );
 end
 % toc
@@ -81,12 +109,11 @@ nnn = hr;
 zf = zlkk;
 Pf = Zlkk;
 xf = x;
-if type ~= 4 
+if type < 4 
     type;
     zfkk = cell(ceil(hr/2),1);
     Pfkk = cell(ceil(hr/2),1);
     xfkk = cell(ceil(hr/2),1);
-
     if nnn ~= 1
         if rem(nnn,2) == 0
             nnn = nnn;
@@ -146,17 +173,33 @@ if type ~= 4
         Ptmp            = pinv(Pkk);
         xtmp            = Ptmp*zkk;
     end
-else
+elseif type == 4
     4;
     [xtmp,Ptmp] = fuze(zf,Pf,xf,hr,n,x_est,typeCZ);
 end
 
-Pkk             = 5*eye(n,n);
-Pkk(x_est,x_est)= Ptmp;
+if type > 4
+    Pkk             = 5*eye(n,n);
+    xkk             = zeros(n,1);
+    for  i = 1:hr
+        if typeCZ == 1
+            xkk(xf{i}) = zf{i};
+            Pkk(xf{i},xf{i}) = Pf{i};
+        else
+            PPtmp = inv(Pf{i});
+            Pkk(xf{i},xf{i}) = PPtmp;
+            xkk(xf{i}) = PPtmp*zf{i};
+        end
+    end
+    xkk(x_unest)    = xkk1(x_unest);
+else
+    Pkk             = 5*eye(n,n);
+    Pkk(x_est,x_est)= Ptmp;
 
-xkk             = zeros(n,1);
-xkk(x_est)      = xtmp;
-xkk(x_unest)    = xkk1(x_unest);
+    xkk             = zeros(n,1);
+    xkk(x_est)      = xtmp;
+    xkk(x_unest)    = xkk1(x_unest);
+end
 
 % Pkk = Pkk(I,I);
 % xkk = xkk(I);

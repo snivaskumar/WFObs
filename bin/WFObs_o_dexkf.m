@@ -9,8 +9,10 @@ if sol_in.k == 1
         disp('Type of fusion: EI')
     elseif strucObs.fusion_type == 3
         disp('Type of fusion: ICI')   
-    else
+    elseif strucObs.fusion_type == 4
         disp('Type of fusion: IFAC')
+    else
+        disp('No fusion')
     end
     if strucObs.typeCZ == 1         % 1 if Z = Co-Variance, 2 if Z = Information
         disp('Type of filter: Conv. KF')
@@ -18,9 +20,9 @@ if sol_in.k == 1
         disp('Type of filter: Info. KF')
     end
     if strucObs.Subsys_length <= 5
-        fprintf('Subsystem Length: %dD (= %.2d)\n',strucObs.Subsys_length,strucObs.Subsys_length*Wp.turbine.Drotor);
+        fprintf('Subsystem Length: %dD (= %.2dm)\n',strucObs.Subsys_length,strucObs.Subsys_length*Wp.turbine.Drotor);
     else
-        fprintf('Subsystem Length: %d\n',strucObs.Subsys_length);
+        fprintf('Subsystem Length: 0.2%dm\n',strucObs.Subsys_length);
     end
     if strucObs.linearize_freq == Inf
         fprintf('System is linearized only at the first iteration.\n');
@@ -38,7 +40,10 @@ if sol_in.k == 1
 else
     xk1k1 = sol_in.x;
 end
-        
+
+% Add noise
+% xk1k1 = xk1k1 + strucObs.noise*randn(size(xk1k1));
+
 % Import measurement data variable
 measuredData    = sol_in.measuredData;
 tur             = Wp.turbine.N;
@@ -141,25 +146,27 @@ RD              = Wp.turbine.Drotor;
 Subsys_length   = strucObs.Subsys_length;
 type            = strucObs.fusion_type;
 typeCZ          = strucObs.typeCZ;
+% tic
 if (sol_in.k == 1) || (rem(sol_in.k,NL) == 0)
-    [x,d,p, F,D,G,H,Q,R,l,n,x_est,x_unest, P_unest] = subsystem_turbine(strucObs,sol_in, p,Fk,Bk,Ck,QQ,RR, tur,state,strucObs.turbine, Subsys_length,RD, Sk1k1);
+    [x,d,p, F,D,E,G,H,Q,R,l,n,x_est,x_unest, P_unest] = subsystem_turbine(strucObs,sol_in, p,Fk,Bk,Ck,QQ,RR, tur,state,strucObs.turbine, Subsys_length,RD, Sk1k1);
     strucObs.subsystem.x = x;           strucObs.subsystem.d = d;
-    strucObs.subsystem.F = F;           strucObs.subsystem.D = D;
+    strucObs.subsystem.F = F;           strucObs.subsystem.D = D;   strucObs.subsystem.E = E;   
     strucObs.subsystem.G = G;           strucObs.subsystem.H = H;
     strucObs.subsystem.Q = Q;           strucObs.subsystem.R = R;
     strucObs.subsystem.l = l;           strucObs.subsystem.n = n;
     strucObs.subsystem.x_est = x_est;   strucObs.subsystem.x_unest = x_unest;
     strucObs.subsystem.P_unest = P_unest;
 end
+% toc
 x       = strucObs.subsystem.x;         d       = strucObs.subsystem.d;
-F       = strucObs.subsystem.F;         D       = strucObs.subsystem.D;
+F       = strucObs.subsystem.F;         D       = strucObs.subsystem.D; E = strucObs.subsystem.E;
 G       = strucObs.subsystem.G;         H       = strucObs.subsystem.H;
 Q       = strucObs.subsystem.Q;         R       = strucObs.subsystem.R;
 l       = strucObs.subsystem.l;         n       = strucObs.subsystem.n;
 x_est   = strucObs.subsystem.x_est;     x_unest = strucObs.subsystem.x_unest;
 P_unest = strucObs.subsystem.P_unest;
-
-[xkk Pkk] = distributed_linear( x,d,p,l,n, F,D,G,H,Q,R, y, xkk1,xk1k1,Sk1k1, x_est,x_unest, P_unest, type,typeCZ );
+% tic
+[xkk Pkk] = distributed_linear( x,d,p,l,n, F,D,E,G,H,Q,R, y, xkk1,xk1k1,Sk1k1, x_est,x_unest, P_unest, type,typeCZ );
 % toc
 
 sol_out.x   = xkk;

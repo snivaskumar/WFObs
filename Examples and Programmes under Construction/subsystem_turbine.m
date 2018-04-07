@@ -1,4 +1,4 @@
-function [x,d,p, F,D,G,H,Q,R, tur,n, x_est,x_unest, P_unest] = subsystem_turbine(strucObs,sol_in, p,Fk,Bk,C,QQ,RR, tur,state,turbLocArray, Subsys_length,RD, Sk1k1);
+function [x,d,p, F,D,E,G,H,Q,R, tur,n, x_est,x_unest, P_unest] = subsystem_turbine(strucObs,sol_in, p,Fk,Bk,C,QQ,RR, tur,state,turbLocArray, Subsys_length,RD, Sk1k1);
 % [x,d, F,D,G,H,Q,R,y, tur,n, x_est,x_unest, P_unest] = subsystem_turbine(Fk,Bk,C,QQ,RR,yy, tur,stateLocArray,turbLocArray, Sk1k1);
 
 % Model Decomposition
@@ -31,6 +31,7 @@ if sol_in.k == 1
 
     RD;
     if Subsys_length <= 5
+        sub_len = Subsys_length;
         Subsys_length = Subsys_length*RD;
     else
         Subsys_length = Subsys_length;
@@ -49,6 +50,25 @@ if sol_in.k == 1
     end
     % toc
 
+    opu = [strucObs.obs_array_locu.x;strucObs.obs_array_locu.y]';
+    opv = [strucObs.obs_array_locv.x;strucObs.obs_array_locv.y]';
+    
+%     figure, plot(state(:,2),state(:,1),'sb') 
+%     for i = 1:tur
+%         hold on, plot(turbine(i,2),turbine(i,1),'s','LineWidth',3)
+%         hold on, plot(x_pos{i}(:,2),x_pos{i}(:,1),'*')
+%     end
+%     for i = 1:length(opu)
+%         hold on, plot(opu(i,2),opu(i,1),'*k','LineWidth',2)
+%     end
+%     for i = 1:length(opv)
+%         hold on, plot(opv(i,2),opv(i,1),'*r','LineWidth',2)
+%     end
+%     hold off
+%     xlabel('y-direction'),ylabel('x-direction');
+%     titl = sprintf('Decomposing the flow field into sub-systems (%dD)',sub_len);
+%     title(titl),legend('Flow fields','Turbine 1','Sub-System 1','Turbine 2','Sub-System2');    
+    
     x_est = x{1};
     for i = 2:tur
         x_est = union( x_est, x{i} );
@@ -81,6 +101,7 @@ x_est   = strucObs.subsystem.x_est;     x_unest = strucObs.subsystem.x_unest;
 F   = cell(tur,1);                 % Local A
 H   = cell(tur,1);                 % Local C
 D   = cell(tur,1);                 % Local Internal Input 
+E   = cell(tur,1); 
 G   = cell(tur,1);                 % Local External Input
 Q   = cell(tur,1);
 R   = cell(tur,1);
@@ -89,6 +110,7 @@ y   = cell(tur,1);
 for i = 1:tur
     F{i}    = A( x{i},x{i} );
     D{i}    = A( x{i},d{i} );
+    E{i}    = A( x{i},x_unest );
     G{i}    = Bk( x{i},: );
     H{i}    = Ck( :,x{i} );
     R{i}    = RR( :,: );

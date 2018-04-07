@@ -51,7 +51,7 @@ elseif type == 1
     ZB      = X_b;
     f       = @(w) trace( pinv(w*ZA + (1-w)*ZB) ); % arg (min -f) = arg (max f)
 %     omega   = fminbnd(f,0,1,optimset('Display','off'));
-    omega   = 0.5;
+    omega   = 0.2;
     Zf      = omega*ZA + (1-omega)*ZB;
     zf      = omega*x_a + (1-omega)*x_b;
     1;
@@ -80,15 +80,15 @@ elseif type == 3
     % ICI
     ZA      = X_a;
     ZB      = X_b;
-%     ff      = @(w) trace(pinv(ZA + ZB - ZA*pinv(w*ZB + (1-w)*ZA)*ZB)); % min -f = max f
-    ff      = @(w) trace(-(ZA + ZB - ZA*pinv(w*ZB + (1-w)*ZA)*ZB)); % min -f = max f
-    omega   = fminbnd(ff,0,1,optimset('Display','off'));
-%     omega   = 0.5;
-    Xij     = ZA*pinv(omega*ZB + (1-omega)*ZA)*ZB;
+% %     ff      = @(w) trace(pinv(ZA + ZB - ZA*pinv(w*ZB + (1-w)*ZA)*ZB)); % min -f = max f
+%     ff      = @(w) trace(-(ZA + ZB - ZA*pinv(w*ZB + (1-w)*ZA)*ZB)); % min -f = max f
+%     omega   = fminbnd(ff,0,1,optimset('Display','off'));
+    omega   = 0.5;
+    Xij     = ZA*inv(omega*ZB + (1-omega)*ZA)*ZB;
     Zf      = X_a + X_b - Xij;
 
-    K = ( X_a - (omega)*Xij )*pinv(Zf);
-    L = ( X_b - (1 - omega)*Xij )*pinv(Zf);
+    K = ( X_a - (omega)*Xij )*inv(Zf);
+    L = ( X_b - (1 - omega)*Xij )*inv(Zf);
     zf = K*x_a + L*x_b;
     3;
 end

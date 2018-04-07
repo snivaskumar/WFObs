@@ -18,6 +18,7 @@ end
 strucObs.loadRandomSeed = true; % Load a predefined random seed (for one-to-one comparisons between simulation cases)
 strucObs.noise_obs      = 0.1;  % Disturbance amplitude (m/s) in output data by randn*noiseampl ('0' for no noise)
 strucObs.noise_init     = 0.0;  % Disturbance amplitude (m/s) in initial flow field by randn*noiseinit ('0' recommended)
+strucObs.noise          = 0.0;
 
 % strucObs.noise_obs      = 1;
 % strucObs.noise_init     = 1;
@@ -55,8 +56,8 @@ switch lower(strucObs.filtertype)
                                 % Subsys_length = 3  if Subsys_length = 3D
                                 % Subsys_length = 4  if Subsys_length = 4D
                                 % Subsys_length = x  if Subsys_length = x
-        strucObs.fusion_type    = 4;        % CI = 0,1; EI = 2; ICI = 3, IFAC = 4
-        strucObs.typeCZ         = 1;        % 1 if Z = Co-Variance, 2 if Z = Information
+        strucObs.fusion_type    = 4;        % CI = 0,1; EI = 2; ICI = 3, IFAC = 4, No fusion = 5
+        strucObs.typeCZ         = 2;        % 1 if Z = Co-Variance, 2 if Z = Information
         strucObs.linearize_freq = Inf;       % 50 if linearize the non-linear system every 50 iterations
                                             % 100 if linearize the non-linear system every 100 iterations
                                             % N if linearize the non-linear system every N iterations
@@ -112,6 +113,10 @@ switch lower(strucObs.filtertype)
         scriptOptions.exportPressures = false; % Model/predict/filter pressure terms
         scriptOptions.Linearversion   = true;  % Calculate linearized system matrices: necessary for ExKF
         
+        strucObs.linearize_freq = Inf;       % 50 if linearize the non-linear system every 50 iterations
+                                            % 100 if linearize the non-linear system every 100 iterations
+                                            % N if linearize the non-linear system every N iterations
+                                            % Inf if linearize the non-linear system only at the first iteration
         
     % Sliding mode observer (SMO)    
     case {'smo'}

@@ -8,10 +8,10 @@ function [hFigs, scriptOptions] = plotWFObs( Wp,sol_array,sys,scriptOptions,stru
 scriptOptions.plotMesh = 1;
 scriptOptions.Animate = 1;
 scriptOptions.plotContour = 1;
-scriptOptions.plotPower = 1;
-scriptOptions.plotError = 1;
-scriptOptions.plotCenterline = 1;
-scriptOptions.powerForecast = 1;
+scriptOptions.plotPower = 0;
+scriptOptions.plotError = 0;
+scriptOptions.plotCenterline = 0;
+scriptOptions.powerForecast = 0;
 % scriptOptions.savePath = '/Users/Nivas_Kumar/Documents/NivasStudyMaterials/TUDelft/EnKF+WFSim/WFOBS - Queue';
 scriptOptions.savePath = 'C:\Users\Nivas Temp\Documents\Nivas\MSc Thesis\WFObs\results\tmp';
 
