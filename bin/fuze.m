@@ -30,6 +30,7 @@ for i = 1:hr
     l                   = length(x{i});
     nn                  = nn + l;
 
+%     Ze(k+1:nn,k+1:nn)   = inv( (1/l).*sparse(C{i}) );
     Ze(k+1:nn,k+1:nn)   = inv( (1/l).*C{i} );
     if type == 1
         xx(k+1:nn,:)        = z{i};
@@ -43,6 +44,7 @@ end
 if nargin >= 6
     H = H(:,x_est);
 end
+H = sparse(H);
 
 Ce = inv(H'*Ze*H);
 xe = Ce*H'*Ze*xx;

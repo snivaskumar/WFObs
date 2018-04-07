@@ -29,6 +29,11 @@ if sol_in.k == 1
     else
         fprintf('System is linearized every %d iterations.\n',strucObs.linearize_freq);
     end
+    if strucObs.Optimize == 0
+        disp('Unoptimized');
+    else
+        disp('Optimized');
+    end
 end
 
 if sol_in.k == 1
@@ -166,7 +171,7 @@ l       = strucObs.subsystem.l;         n       = strucObs.subsystem.n;
 x_est   = strucObs.subsystem.x_est;     x_unest = strucObs.subsystem.x_unest;
 P_unest = strucObs.subsystem.P_unest;
 % tic
-[xkk Pkk] = distributed_linear( x,d,p,l,n, F,D,E,G,H,Q,R, y, xkk1,xk1k1,Sk1k1, x_est,x_unest, P_unest, type,typeCZ );
+[xkk Pkk] = distributed_linear( strucObs,x,d,p,l,n, F,D,E,G,H,Q,R, y, xkk1,xk1k1,Sk1k1, x_est,x_unest, P_unest, type,typeCZ );
 % toc
 
 sol_out.x   = xkk;

@@ -62,6 +62,7 @@ switch lower(strucObs.filtertype)
                                             % 100 if linearize the non-linear system every 100 iterations
                                             % N if linearize the non-linear system every N iterations
                                             % Inf if linearize the non-linear system only at the first iteration
+        strucObs.Optimize       = 1;        % 0 = Unoptimized, 1 = Optimized
                                             
     % Distributed Unscented Kalman filter (UKF)    
     case {'dukf'}
