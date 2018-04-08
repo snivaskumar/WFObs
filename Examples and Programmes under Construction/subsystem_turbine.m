@@ -110,14 +110,17 @@ y   = cell(tur,1);
 for i = 1:tur
     F{i}    = A( x{i},x{i} );
     D{i}    = A( x{i},d{i} );
-%     if strucObs.Optimize == 0
-        E{i}    = A( x{i},x_unest );
-%     else
-%         len_x       = length(x{i});
-%         len_xunest  = length(x_unest);
-%         E{i}        = sparse(zeros(len_x,len_xunest));
-%         E{i}(1:min(len_x,len_xunest),1:min(len_x,len_xunest)) = sparse(diag(diag(A( x{i},x_unest ))));
-%     end
+    E{i}    = A( x{i},x_unest );
+    if strucObs.superOptimize == 1
+        factor          = strucObs.superOptimizeFactor;
+        indices         = find( abs(E{i})<factor );
+        E{i}(indices)   = 0;
+        E{i}            = sparse(E{i});
+% % %         len_x       = length(x{i});
+% % %         len_xunest  = length(x_unest);
+% % %         E{i}        = sparse(zeros(len_x,len_xunest));
+% % %         E{i}(1:min(len_x,len_xunest),1:min(len_x,len_xunest)) = sparse(diag(diag(A( x{i},x_unest ))));
+    end
     G{i}    = Bk( x{i},: );
     H{i}    = Ck( :,x{i} );
     R{i}    = RR( :,: );

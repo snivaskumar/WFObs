@@ -30,9 +30,14 @@ if sol_in.k == 1
         fprintf('System is linearized every %d iterations.\n',strucObs.linearize_freq);
     end
     if strucObs.Optimize == 0
-        disp('Unoptimized');
+        disp('Optimize: No');
     else
-        disp('Optimized');
+        disp('Optimize: Yes');
+    end
+    if strucObs.superOptimize == 0
+        disp('Super Optimize: No');
+    else
+        fprintf('Super Optimize: Yes, with a factor of %.2d.\n',strucObs.superOptimizeFactor);
     end
 end
 

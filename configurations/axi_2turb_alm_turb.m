@@ -49,7 +49,7 @@ switch lower(strucObs.filtertype)
     
         strucObs.tune.est  = false; % Estimate model parameters
         
-        strucObs.Subsys_length  = 1;        % Length of the subsystem around each turbine 
+        strucObs.Subsys_length  = 3;        % Length of the subsystem around each turbine 
                                 % Subsys_length = 1  if Subsys_length = 1D
                                 % (D = Rotor length)
                                 % Subsys_length = 2  if Subsys_length = 2D
@@ -62,8 +62,10 @@ switch lower(strucObs.filtertype)
                                             % 100 if linearize the non-linear system every 100 iterations
                                             % N if linearize the non-linear system every N iterations
                                             % Inf if linearize the non-linear system only at the first iteration
-        strucObs.Optimize       = 1;        % 0 = Unoptimized, 1 = Optimized
-                                            
+        strucObs.Optimize       = 1;        % (consider only diagonal of Slee, Slfe, Slde) 0 = Unoptimized, 1 = Optimized
+        strucObs.superOptimize  = 1;        % (superOptimize = if E{i}(j,k)<factor, E{i}(j,k) = 0 )
+        strucObs.superOptimizeFactor  = 1e-4;
+        
     % Distributed Unscented Kalman filter (UKF)    
     case {'dukf'}
         % General settings
