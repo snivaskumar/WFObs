@@ -1,6 +1,7 @@
-function [xe,Ce] = fuze(z,Z,x,hr,n,x_est,type);
-% [xe,Ce] = fuze(z,Z,x,hr,n,x_est,type);
-% type  1 if Z = Co-Variance,  
+function [xe,Ce] = fuze(z,Z,x,hr,n,Zkk1,xkk1,x_est,typeCZ,typeIFAC,typeWeight);
+% function [xe,Ce] = fuze(z,Z,x,hr,n,x_est,typeCZ);
+% [xe,Ce] = fuze(z,Z,x,hr,n,x_est,typeCZ);
+% typeCZ  1 if Z = Co-Variance,  
 %       2 if Z = Information,
 
 H = [];
@@ -18,35 +19,76 @@ Ze  = [];
 nn  = 0;
 k   = 0;  
 
-if type == 1
+if strcmp(typeCZ,'C')
     C = Z;
-else
+    if typeIFAC == 2
+        Zkk1{i} = inv(Zkk1{i});
+    end
+elseif strcmp(typeCZ,'Z')
     for i = 1:hr
         C{i} = inv(Z{i});
     end
 end
 
+Zp = zeros(n,n);
 for i = 1:hr
     l                   = length(x{i});
     nn                  = nn + l;
-
-%     Ze(k+1:nn,k+1:nn)   = inv( (1/l).*sparse(C{i}) );
-    Ze(k+1:nn,k+1:nn)   = inv( (1/l).*C{i} );
-    if type == 1
+    
+    if typeIFAC == 2
+        Zp(x{i},x{i})       = Zkk1{i};
+    end
+    if strcmp(typeWeight,'CONSTANT')
+        w = l;
+        Ze(k+1:nn,k+1:nn)   = inv( (1/w).*C{i} );
+    elseif strcmp(typeWeight,'OPTIMAL')
+        Ze(k+1:nn,k+1:nn)   = C{i};
+%         f = @(w) trace((1/w).*C{i});
+%         w = fminbnd(f,0,1,optimset('Display','off'));
+%         Ze(k+1:nn,k+1:nn)   = inv( (1/w).*C{i} );
+    end
+    if strcmp(typeCZ,'C')
         xx(k+1:nn,:)        = z{i};
-    else
+    elseif strcmp(typeCZ,'Z')
         xx(k+1:nn,:)        = C{i}*z{i};
     end
 
     k                   = k + l;
 end
+if strcmp(typeWeight,'OPTIMAL')
+    f   = @(w) trace((1/w).*Ze);
+    w   = fminbnd(f,0,1,optimset('Display','off'));
+    Ze  = inv( (1/w).*Ze );
+end
 
-if nargin >= 6
-    H = H(:,x_est);
+if typeIFAC == 2
+    Zp = Zp(x_est,x_est);
+    if nargin >= 8
+        H = H(:,x_est);
+    end
+else
+    if nargin >= 6
+        H = H(:,x_est);
+    end
 end
 H = sparse(H);
 
-Ce = inv(H'*Ze*H);
+% size(Zp)
+% size(H'*Ze*H)
+if typeIFAC == 2
+    Ce          = inv(Zp + H'*Ze*H);
+    l_est       = length(x_est);
+    [rze,cze]   = size(Ze);
+    H           = [eye(l_est,l_est);H];
+    Ze          = [Zp, zeros(l_est,cze); zeros(rze,l_est), Ze]; 
+    xx          = [xkk1(x_est); xx]; 
+else
+    Ce = inv(H'*Ze*H);
+%     xe = Ce*H'*Ze*xx;
+end
+% size(Ze)
+% size(H)
+% size(xx)
+% size(Ce)
 xe = Ce*H'*Ze*xx;
-
 end

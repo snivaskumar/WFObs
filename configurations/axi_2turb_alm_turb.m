@@ -33,7 +33,7 @@ strucObs.measFlow    = true;   % Use flow measurements (LIDAR) in estimates
 strucObs.sensorsPath = 'sensors_2turb_alm'; % measurement setup filename (see '/setup_sensors/sensors_layouts')
         
 % Kalman filter settings
-strucObs.filtertype = 'dexkf'; % Observer types are outlined next
+strucObs.filtertype = 'sim'; % Observer types are outlined next
 switch lower(strucObs.filtertype)
     % Distributed Extended Kalman filter (ExKF)
     case {'dexkf'}
@@ -49,22 +49,25 @@ switch lower(strucObs.filtertype)
     
         strucObs.tune.est  = false; % Estimate model parameters
         
-        strucObs.Subsys_length  = 3;        % Length of the subsystem around each turbine 
+        strucObs.Subsys_length  = 2;        % Length of the subsystem around each turbine 
                                 % Subsys_length = 1  if Subsys_length = 1D
                                 % (D = Rotor length)
                                 % Subsys_length = 2  if Subsys_length = 2D
                                 % Subsys_length = 3  if Subsys_length = 3D
                                 % Subsys_length = 4  if Subsys_length = 4D
                                 % Subsys_length = x  if Subsys_length = x
-        strucObs.fusion_type    = 4;        % CI = 0,1; EI = 2; ICI = 3, IFAC = 4, No fusion = 5
-        strucObs.typeCZ         = 2;        % 1 if Z = Co-Variance, 2 if Z = Information
-        strucObs.linearize_freq = Inf;       % 50 if linearize the non-linear system every 50 iterations
+        strucObs.fusion_type    = 'ifac';   % CI = 0,1; EI = 2; ICI = 3, IFAC = 4, No fusion = 5
+        strucObs.IFAC_type      = 1;        % 1 for z_k, 2 for z_k and x_p
+        strucObs.IFACWeight     = 'optimal';% Optimal or Constant
+        strucObs.typeCZ         = 'z';      % C = Co-Variance, Z = Information
+        strucObs.linearize_freq = Inf;      % 50 if linearize the non-linear system every 50 iterations
                                             % 100 if linearize the non-linear system every 100 iterations
                                             % N if linearize the non-linear system every N iterations
                                             % Inf if linearize the non-linear system only at the first iteration
         strucObs.Optimize       = 1;        % (consider only diagonal of Slee, Slfe, Slde) 0 = Unoptimized, 1 = Optimized
         strucObs.superOptimize  = 1;        % (superOptimize = if E{i}(j,k)<factor, E{i}(j,k) = 0 )
         strucObs.superOptimizeFactor  = 1e-4;
+        strucObs.extremeOptimize         = 1;
         
     % Distributed Unscented Kalman filter (UKF)    
     case {'dukf'}

@@ -1,3 +1,105 @@
+%% Linearizing at different frequencies with 2D and U_inf = 5 and it is not estimated
+clear all
+close all
+clc
+%IFAC_2DZE_extopti_1em4%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+clear scriptOptions sol_array strucObs sys Wp
+load('C:\Users\Nivas Temp\Documents\Nivas\MSc Thesis\WFObs_Queue\2Turbine\axi_2turb_alm_turb_dexkf_IFAC_2DZE_uinf_noest_extremeopti_1em4\workspace.mat')
+scriptOptions.powerForecast = 0;
+% [pwWFSim1,timeWFSim1,~,~] = plotpower( Wp,sol_array,sys,scriptOptions,strucObs, 0 );
+for i = 1:Wp.sim.NN
+    cRMSE1(i) = sol_array(i).score.RMSE_cline;
+    maxError1(i) = sol_array(i).score.maxError;
+    RMSE_flow1(i) = sol_array(i).score.RMSE_flow;
+    time1(i) = sol_array(i).score.CPUtime;
+end
+Wp1 = Wp; sol_array1 = sol_array; sys1 = sys; 
+scriptOptions1 = scriptOptions; strucObs1 = strucObs;
+%IFAC_2DZE_extopti_1em4_NL_10%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+clear scriptOptions sol_array strucObs sys Wp
+load('C:\Users\Nivas Temp\Documents\Nivas\MSc Thesis\WFObs_Queue\2Turbine\axi_2turb_alm_turb_dexkf_IFAC_2DZE_uinf_noest_ext_1em4_NL_10\workspace.mat')
+scriptOptions.powerForecast = 0;
+% [pwWFSim2,timeWFSim2,~,~] = plotpower( Wp,sol_array,sys,scriptOptions,strucObs, 0 );
+for i = 1:Wp.sim.NN
+    cRMSE2(i) = sol_array(i).score.RMSE_cline;
+    maxError2(i) = sol_array(i).score.maxError;
+    RMSE_flow2(i) = sol_array(i).score.RMSE_flow;
+    time2(i) = sol_array(i).score.CPUtime;
+end
+Wp2 = Wp; sol_array2 = sol_array; sys2 = sys; 
+scriptOptions2 = scriptOptions; strucObs2 = strucObs;
+%IFAC_2DZE_extopti_1em4_NL_20%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+clear scriptOptions sol_array strucObs sys Wp
+load('C:\Users\Nivas Temp\Documents\Nivas\MSc Thesis\WFObs_Queue\2Turbine\axi_2turb_alm_turb_dexkf_IFAC_2DZE_uinf_noest_ext_1em4_NL_20\workspace.mat')
+scriptOptions.powerForecast = 0;
+% [pwWFSim3,timeWFSim3,~,~] = plotpower( Wp,sol_array,sys,scriptOptions,strucObs, 0 );
+for i = 1:Wp.sim.NN
+    cRMSE3(i) = sol_array(i).score.RMSE_cline;
+    maxError3(i) = sol_array(i).score.maxError;
+    RMSE_flow3(i) = sol_array(i).score.RMSE_flow;
+    time3(i) = sol_array(i).score.CPUtime;
+end
+Wp3 = Wp; sol_array3 = sol_array; sys3 = sys; 
+scriptOptions3 = scriptOptions; strucObs3 = strucObs;
+%IFAC_2DZE_extopti_1em4_NL_50%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+clear scriptOptions sol_array strucObs sys Wp
+load('C:\Users\Nivas Temp\Documents\Nivas\MSc Thesis\WFObs_Queue\2Turbine\axi_2turb_alm_turb_dexkf_IFAC_2DZE_uinf_noest_ext_1em4_NL_50\workspace.mat')
+scriptOptions.powerForecast = 0;
+% [pwWFSim4,timeWFSim4,~,~] = plotpower( Wp,sol_array,sys,scriptOptions,strucObs, 0 );
+for i = 1:Wp.sim.NN
+    cRMSE4(i) = sol_array(i).score.RMSE_cline;
+    maxError4(i) = sol_array(i).score.maxError;
+    RMSE_flow4(i) = sol_array(i).score.RMSE_flow;
+    time4(i) = sol_array(i).score.CPUtime;
+end
+Wp4 = Wp; sol_array4 = sol_array; sys4 = sys; 
+scriptOptions4 = scriptOptions; strucObs4 = strucObs;
+%IFAC_2DZE_extopti_1em4_NL_100%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+clear scriptOptions sol_array strucObs sys Wp
+load('C:\Users\Nivas Temp\Documents\Nivas\MSc Thesis\WFObs_Queue\2Turbine\axi_2turb_alm_turb_dexkf_IFAC_2DZE_uinf_noest_ext_1em4_NL_100\workspace.mat')
+scriptOptions.powerForecast = 0;
+% [pwWFSim5,timeWFSim5,~,~] = plotpower( Wp,sol_array,sys,scriptOptions,strucObs, 0 );
+for i = 1:Wp.sim.NN
+    cRMSE5(i) = sol_array(i).score.RMSE_cline;
+    maxError5(i) = sol_array(i).score.maxError;
+    RMSE_flow5(i) = sol_array(i).score.RMSE_flow;
+    time5(i) = sol_array(i).score.CPUtime;
+end
+Wp5 = Wp; sol_array5 = sol_array; sys5 = sys; 
+scriptOptions5 = scriptOptions; strucObs5 = strucObs;
+figure, plot(cRMSE1), hold on, 
+plot(cRMSE2), plot(cRMSE3), plot(cRMSE4), plot(cRMSE5), 
+legend('DExKF_IFAC:2D_extopti_NL_inf','DExKF_IFAC:2D_extopti_NL_10','DExKF_IFAC:2D_extopti_NL_20','DExKF_IFAC:2D_extopti_NL_50','DExKF_IFAC:2D_extopti_NL_100')
+title('RMSE_cline'), xlabel('Time (sec)'), ylabel('RMSE')
+figure, plot(maxError1), hold on, 
+plot(maxError2), plot(maxError3), plot(maxError4), plot(maxError5), 
+legend('DExKF_IFAC:2D_extopti_NL_inf','DExKF_IFAC:2D_extopti_NL_10','DExKF_IFAC:2D_extopti_NL_20','DExKF_IFAC:2D_extopti_NL_50','DExKF_IFAC:2D_extopti_NL_100')
+title('maxError'), xlabel('Time (sec)'), ylabel('maxError')
+figure, plot(RMSE_flow1), hold on, 
+plot(RMSE_flow2), plot(RMSE_flow3), plot(RMSE_flow4), plot(RMSE_flow5), 
+legend('DExKF_IFAC:2D_extopti_NL_inf','DExKF_IFAC:2D_extopti_NL_10','DExKF_IFAC:2D_extopti_NL_20','DExKF_IFAC:2D_extopti_NL_50','DExKF_IFAC:2D_extopti_NL_100')
+title('RMSE_flow'), xlabel('Time (sec)'), ylabel('RMSE_flow')
+x = [1:5];
+avg_time = [sum(time2),sum(time3),sum(time4),sum(time5),sum(time1)]./Wp.sim.NN;
+RMSE_flow = [sum(RMSE_flow2),sum(RMSE_flow3),sum(RMSE_flow4),sum(RMSE_flow5),sum(RMSE_flow1)]./Wp.sim.NN;
+maxError = [sum(maxError2),sum(maxError3),sum(maxError4),sum(maxError5),sum(maxError1)]./Wp.sim.NN;
+figure, 
+yyaxis left, plot(x,avg_time,'--*'),
+ylabel('Average time (sec)')
+% yyaxis right, plot(x,RMSE_flow,':o')
+% ylabel('Average RMSE_flow')
+yyaxis right, plot(x,maxError,':o')
+ylabel('Average maxError')
+xticks(x)
+xticklabels({'Every 10 secs','Every 20 secs','Every 50 secs','Every 100 secs','1^{st} iteration'})
+title('Effect of linearizing at different frequencies') 
+
+% hold off
+% plotWFObs( Wp1,sol_array1,sys1,scriptOptions1,strucObs1 );
+% plotWFObs( Wp2,sol_array2,sys2,scriptOptions2,strucObs2 );
+% plotWFObs( Wp3,sol_array3,sys3,scriptOptions3,strucObs3 );
+% plotWFObs( Wp4,sol_array4,sys4,scriptOptions4,strucObs4 );
+% plotWFObs( Wp5,sol_array5,sys5,scriptOptions5,strucObs5 );
 %% Different initial value for mixing length and it is not estimated (EnKF, DExKF_IFAC:1D,2D)
 % With E
 clear all
@@ -87,52 +189,6 @@ plotWFObs( Wp1,sol_array1,sys1,scriptOptions1,strucObs1 );
 plotWFObs( Wp2,sol_array2,sys2,scriptOptions2,strucObs2 );
 plotWFObs( Wp3,sol_array3,sys3,scriptOptions3,strucObs3 );
 plotWFObs( Wp4,sol_array4,sys4,scriptOptions4,strucObs4 );
-%% Noise
-clear all
-close all
-clc
-disp('--------------------------')
-disp('DExKF:1D_IFAC')
-clear scriptOptions sol_array strucObs sys Wp
-load('C:\Users\Nivas Temp\Documents\Nivas\MSc Thesis\WFObs_Queue\2Turbine\axi_2turb_alm_turb_dexkf_IFAC_1DZ_NL_Inf\workspace.mat')
-scriptOptions.powerForecast = 0;
-[pwWFSim1,timeWFSim1,~,~] = plotpower( Wp,sol_array,sys,scriptOptions,strucObs, 1 );
-RMSE        = 0;
-maxError    = 0;
-time        = 0;
-for i = 1:Wp.sim.NN
-    RMSE        = RMSE + sol_array(i).score.RMSE_cline;
-    maxError    = maxError + sol_array(i).score.maxError;
-    time        = time + sol_array(i).score.CPUtime;
-    RMSE1(i) = sol_array(i).score.RMSE_cline;
-end
-avg_RMSE_cline1 = RMSE/(Wp.sim.NN - 1)
-avg_maxError1 = maxError/(Wp.sim.NN - 1)
-avg_time1 = time/(Wp.sim.NN - 1)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-disp('--------------------------')
-disp('DExKF:1D_IFAC')
-clear scriptOptions sol_array strucObs sys Wp
-load('C:\Users\Nivas Temp\Documents\Nivas\MSc Thesis\WFObs_Queue\2Turbine\axi_2turb_alm_turb_dexkf_IFAC_1DZ_noise1\workspace.mat')
-scriptOptions.powerForecast = 0;
-[pwWFSim2,timeWFSim2,~,~] = plotpower( Wp,sol_array,sys,scriptOptions,strucObs, 0 );
-RMSE        = 0;
-maxError    = 0;
-time        = 0;
-for i = 1:Wp.sim.NN
-    RMSE        = RMSE + sol_array(i).score.RMSE_cline;
-    maxError    = maxError + sol_array(i).score.maxError;
-    time        = time + sol_array(i).score.CPUtime;
-    RMSE2(i) = sol_array(i).score.RMSE_cline;
-end
-avg_RMSE_cline2 = RMSE/(Wp.sim.NN - 1)
-avg_maxError2 = maxError/(Wp.sim.NN - 1)
-avg_time2 = time/(Wp.sim.NN - 1)
-
-figure, plot(RMSE1), hold on,
-plot(RMSE2),
-legend('DExKF_1D: No Noise','DExKF_1D: Noise')
-
 %% Different initial value for freestream velocity and it is not estimated (EnKF, DExKF_IFAC:1D,2D)
 % Without E
 clear all
@@ -305,7 +361,7 @@ load('C:\Users\Nivas Temp\Documents\Nivas\MSc Thesis\WFObs_Queue\2Turbine\axi_2t
 scriptOptions.powerForecast = 0;
 % [pwWFSim0,timeWFSim0,~,~] = plotpower( Wp,sol_array,sys,scriptOptions,strucObs, 1 );
 for i = 1:Wp.sim.NN
-    u0(i) = sol_array(i).site.u_Inf;
+    time0(i) = sol_array(i).score.CPUtime;
     RMSE0(i) = sol_array(i).score.RMSE_cline;
     maxError0(i) = sol_array(i).score.maxError;
     RMSE_flow0(i) = sol_array(i).score.RMSE_flow;
@@ -317,7 +373,7 @@ load('C:\Users\Nivas Temp\Documents\Nivas\MSc Thesis\WFObs_Queue\2Turbine\axi_2t
 scriptOptions.powerForecast = 0;
 % [pwWFSim1,timeWFSim1,~,~] = plotpower( Wp,sol_array,sys,scriptOptions,strucObs, 0 );
 for i = 1:Wp.sim.NN
-    u1(i) = sol_array(i).site.u_Inf;
+    time1(i) = sol_array(i).score.CPUtime;
     RMSE1(i) = sol_array(i).score.RMSE_cline;
     maxError1(i) = sol_array(i).score.maxError;
     RMSE_flow1(i) = sol_array(i).score.RMSE_flow;
@@ -327,10 +383,10 @@ scriptOptions1 = scriptOptions; strucObs1 = strucObs;
 % %ExKF%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 % clear scriptOptions sol_array strucObs sys Wp
 % load('C:\Users\Nivas Temp\Documents\Nivas\MSc Thesis\WFObs_Queue\2Turbine\axi_2turb_alm_turb_ExKF_uinf_noest\workspace.mat')
-% scriptOptions.powerForecast = 0;
-% [pwWFSim4,timeWFSim4,~,~] = plotpower( Wp,sol_array,sys,scriptOptions,strucObs, 0 );
+% % scriptOptions.powerForecast = 0;
+% % [pwWFSim4,timeWFSim4,~,~] = plotpower( Wp,sol_array,sys,scriptOptions,strucObs, 0 );
 % for i = 1:Wp.sim.NN
-%     u4(i) = sol_array(i).site.u_Inf;
+%     time4(i) = sol_array(i).score.CPUtime;
 %     RMSE4(i) = sol_array(i).score.RMSE_cline;
 %     maxError4(i) = sol_array(i).score.maxError;
 %     RMSE_flow4(i) = sol_array(i).score.RMSE_flow;
@@ -340,10 +396,10 @@ scriptOptions1 = scriptOptions; strucObs1 = strucObs;
 % %IFAC_1DZE%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 % clear scriptOptions sol_array strucObs sys Wp
 % load('C:\Users\Nivas Temp\Documents\Nivas\MSc Thesis\WFObs_Queue\2Turbine\axi_2turb_alm_turb_dexkf_IFAC_1DZE_uinf_noest\workspace.mat')
-% scriptOptions.powerForecast = 0;
-% [pwWFSim10,timeWFSim10,~,~] = plotpower( Wp,sol_array,sys,scriptOptions,strucObs, 0 );
+% % scriptOptions.powerForecast = 0;
+% % [pwWFSim10,timeWFSim10,~,~] = plotpower( Wp,sol_array,sys,scriptOptions,strucObs, 0 );
 % for i = 1:Wp.sim.NN
-%     u10(i) = sol_array(i).site.u_Inf;
+%     time10(i) = sol_array(i).score.CPUtime;
 %     RMSE10(i) = sol_array(i).score.RMSE_cline;
 %     maxError10(i) = sol_array(i).score.maxError;
 %     RMSE_flow10(i) = sol_array(i).score.RMSE_flow;
@@ -356,7 +412,7 @@ load('C:\Users\Nivas Temp\Documents\Nivas\MSc Thesis\WFObs_Queue\2Turbine\axi_2t
 scriptOptions.powerForecast = 0;
 % [pwWFSim11,timeWFSim11,~,~] = plotpower( Wp,sol_array,sys,scriptOptions,strucObs, 0 );
 for i = 1:Wp.sim.NN
-    u11(i) = sol_array(i).site.u_Inf;
+    time11(i) = sol_array(i).score.CPUtime;
     RMSE11(i) = sol_array(i).score.RMSE_cline;
     maxError11(i) = sol_array(i).score.maxError;
     RMSE_flow11(i) = sol_array(i).score.RMSE_flow;
@@ -369,7 +425,7 @@ load('C:\Users\Nivas Temp\Documents\Nivas\MSc Thesis\WFObs_Queue\2Turbine\axi_2t
 scriptOptions.powerForecast = 0;
 % [pwWFSim12,timeWFSim12,~,~] = plotpower( Wp,sol_array,sys,scriptOptions,strucObs, 0 );
 for i = 1:Wp.sim.NN
-    u12(i) = sol_array(i).site.u_Inf;
+    time12(i) = sol_array(i).score.CPUtime;
     RMSE12(i) = sol_array(i).score.RMSE_cline;
     maxError12(i) = sol_array(i).score.maxError;
     RMSE_flow12(i) = sol_array(i).score.RMSE_flow;
@@ -402,13 +458,13 @@ scriptOptions12 = scriptOptions; strucObs12 = strucObs;
 % end
 % Wp14 = Wp; sol_array14 = sol_array; sys14 = sys; 
 % scriptOptions14 = scriptOptions; strucObs14 = strucObs;
-% %IFAC_1DZE_opti%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%IFAC_1DZE_opti%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 % clear scriptOptions sol_array strucObs sys Wp
 % load('C:\Users\Nivas Temp\Documents\Nivas\MSc Thesis\WFObs_Queue\2Turbine\axi_2turb_alm_turb_dexkf_IFAC_1DZE_uinf_noest_opti\workspace.mat')
-% scriptOptions.powerForecast = 0;
-% [pwWFSim15,timeWFSim15,~,~] = plotpower( Wp,sol_array,sys,scriptOptions,strucObs, 0 );
+% % scriptOptions.powerForecast = 0;
+% % [pwWFSim15,timeWFSim15,~,~] = plotpower( Wp,sol_array,sys,scriptOptions,strucObs, 0 );
 % for i = 1:Wp.sim.NN
-%     u15(i) = sol_array(i).site.u_Inf;
+%     time15(i) = sol_array(i).score.CPUtime;
 %     RMSE15(i) = sol_array(i).score.RMSE_cline;
 %     maxError15(i) = sol_array(i).score.maxError;
 %     RMSE_flow15(i) = sol_array(i).score.RMSE_flow;
@@ -418,10 +474,10 @@ scriptOptions12 = scriptOptions; strucObs12 = strucObs;
 % %IFAC_2DZE_opti%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 % clear scriptOptions sol_array strucObs sys Wp
 % load('C:\Users\Nivas Temp\Documents\Nivas\MSc Thesis\WFObs_Queue\2Turbine\axi_2turb_alm_turb_dexkf_IFAC_2DZE_uinf_noest_opti\workspace.mat')
-% scriptOptions.powerForecast = 0;
-% [pwWFSim16,timeWFSim16,~,~] = plotpower( Wp,sol_array,sys,scriptOptions,strucObs, 0 );
+% % scriptOptions.powerForecast = 0;
+% % [pwWFSim16,timeWFSim16,~,~] = plotpower( Wp,sol_array,sys,scriptOptions,strucObs, 0 );
 % for i = 1:Wp.sim.NN
-%     u16(i) = sol_array(i).site.u_Inf;
+%     time16(i) = sol_array(i).score.CPUtime;
 %     RMSE16(i) = sol_array(i).score.RMSE_cline;
 %     maxError16(i) = sol_array(i).score.maxError;
 %     RMSE_flow16(i) = sol_array(i).score.RMSE_flow;
@@ -431,10 +487,10 @@ scriptOptions12 = scriptOptions; strucObs12 = strucObs;
 % %IFAC_3DZE_opti%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 % clear scriptOptions sol_array strucObs sys Wp
 % load('C:\Users\Nivas Temp\Documents\Nivas\MSc Thesis\WFObs_Queue\2Turbine\axi_2turb_alm_turb_dexkf_IFAC_3DZE_uinf_noest_opti\workspace.mat')
-% scriptOptions.powerForecast = 0;
-% [pwWFSim17,timeWFSim17,~,~] = plotpower( Wp,sol_array,sys,scriptOptions,strucObs, 0 );
+% % scriptOptions.powerForecast = 0;
+% % [pwWFSim17,timeWFSim17,~,~] = plotpower( Wp,sol_array,sys,scriptOptions,strucObs, 0 );
 % for i = 1:Wp.sim.NN
-%     u17(i) = sol_array(i).site.u_Inf;
+%     time17(i) = sol_array(i).score.CPUtime;
 %     RMSE17(i) = sol_array(i).score.RMSE_cline;
 %     maxError17(i) = sol_array(i).score.maxError;
 %     RMSE_flow17(i) = sol_array(i).score.RMSE_flow;
@@ -447,7 +503,7 @@ load('C:\Users\Nivas Temp\Documents\Nivas\MSc Thesis\WFObs_Queue\2Turbine\axi_2t
 scriptOptions.powerForecast = 0;
 % [pwWFSim18,timeWFSim18,~,~] = plotpower( Wp,sol_array,sys,scriptOptions,strucObs, 0 );
 for i = 1:Wp.sim.NN
-    u18(i) = sol_array(i).site.u_Inf;
+    time18(i) = sol_array(i).score.CPUtime;
     RMSE18(i) = sol_array(i).score.RMSE_cline;
     maxError18(i) = sol_array(i).score.maxError;
     RMSE_flow18(i) = sol_array(i).score.RMSE_flow;
@@ -460,7 +516,7 @@ load('C:\Users\Nivas Temp\Documents\Nivas\MSc Thesis\WFObs_Queue\2Turbine\axi_2t
 scriptOptions.powerForecast = 0;
 % [pwWFSim19,timeWFSim19,~,~] = plotpower( Wp,sol_array,sys,scriptOptions,strucObs, 0 );
 for i = 1:Wp.sim.NN
-    u19(i) = sol_array(i).site.u_Inf;
+    time19(i) = sol_array(i).score.CPUtime;
     RMSE19(i) = sol_array(i).score.RMSE_cline;
     maxError19(i) = sol_array(i).score.maxError;
     RMSE_flow19(i) = sol_array(i).score.RMSE_flow;
@@ -473,7 +529,7 @@ load('C:\Users\Nivas Temp\Documents\Nivas\MSc Thesis\WFObs_Queue\2Turbine\axi_2t
 scriptOptions.powerForecast = 0;
 % [pwWFSim20,timeWFSim20,~,~] = plotpower( Wp,sol_array,sys,scriptOptions,strucObs, 0 );
 for i = 1:Wp.sim.NN
-    u20(i) = sol_array(i).site.u_Inf;
+    time20(i) = sol_array(i).score.CPUtime;
     RMSE20(i) = sol_array(i).score.RMSE_cline;
     maxError20(i) = sol_array(i).score.maxError;
     RMSE_flow20(i) = sol_array(i).score.RMSE_flow;
@@ -486,31 +542,144 @@ load('C:\Users\Nivas Temp\Documents\Nivas\MSc Thesis\WFObs_Queue\2Turbine\axi_2t
 scriptOptions.powerForecast = 0;
 % [pwWFSim21,timeWFSim21,~,~] = plotpower( Wp,sol_array,sys,scriptOptions,strucObs, 0 );
 for i = 1:Wp.sim.NN
-    u21(i) = sol_array(i).site.u_Inf;
+    time21(i) = sol_array(i).score.CPUtime;
     RMSE21(i) = sol_array(i).score.RMSE_cline;
     maxError21(i) = sol_array(i).score.maxError;
     RMSE_flow21(i) = sol_array(i).score.RMSE_flow;
 end
 Wp21 = Wp; sol_array21 = sol_array; sys21 = sys; 
 scriptOptions21 = scriptOptions; strucObs21 = strucObs;
+x = [1:13];
+avg_time = [sum(time0)/length(time0),sum(time1)/length(time1),...
+    sum(time4)/length(time4),sum(time10)/length(time10),...
+    sum(time15)/length(time11),sum(time11)/length(time15),...
+    sum(time16)/length(time15),sum(time18)/length(time15),...
+    sum(time19)/length(time15),sum(time20)/length(time15),...
+    sum(time12)/length(time16),sum(time17)/length(time17),...
+    sum(time21)/length(time15)];
+RMSE_flow = [sum(RMSE_flow0)/length(RMSE_flow0),sum(RMSE_flow1)/length(RMSE_flow1),...
+    sum(RMSE_flow4)/length(RMSE_flow4),sum(RMSE_flow10)/length(RMSE_flow10),...
+    sum(RMSE_flow15)/length(RMSE_flow11),sum(RMSE_flow11)/length(RMSE_flow12),...
+    sum(RMSE_flow16)/length(RMSE_flow15),sum(RMSE_flow18)/length(RMSE_flow15),...
+    sum(RMSE_flow19)/length(RMSE_flow15),sum(RMSE_flow20)/length(RMSE_flow15),...
+    sum(RMSE_flow12)/length(RMSE_flow16),sum(RMSE_flow17)/length(RMSE_flow17),...
+    sum(RMSE_flow21)/length(RMSE_flow15)];
+maxError = [sum(maxError0)/length(maxError0),sum(maxError1/length(maxError1)),...
+    sum(maxError4)/length(maxError4),sum(maxError10)/length(maxError10),...
+    sum(maxError15)/length(maxError11),sum(maxError11)/length(maxError12),...
+    sum(maxError16)/length(maxError15),sum(maxError18)/length(maxError15),...
+    sum(maxError19)/length(maxError15),sum(maxError20)/length(maxError15),...
+    sum(maxError12)/length(maxError16),sum(maxError17)/length(maxError17),...
+    sum(maxError21)/length(maxError15)];
+figure, 
+yyaxis left, plot(x,avg_time,'--*'),
+ylabel('Average time (sec)')
+% yyaxis right, plot(x,RMSE_flow,':o')
+% ylabel('Average RMSE_flow')
+yyaxis right, plot(x,maxError,':o')
+ylabel('Average maxError')
+xticks(x)
+xticklabels({'OPEN','EnKF','ExKF','1D','1Dopti','2D','2Dopti','2Dsopti1em2','2Dsopti1em3','2Dsopti1em4','3D','3Dopti','3Dsopti1em4'})
+xtickangle(90)
+title('Effect of estimation size') 
+figure,
+plot(RMSE_flow0), hold on,plot(RMSE_flow1),plot(RMSE_flow4),
+plot(RMSE_flow10),plot(RMSE_flow15),plot(RMSE_flow11),
+plot(RMSE_flow16),plot(RMSE_flow18),plot(RMSE_flow19),
+plot(RMSE_flow20),plot(RMSE_flow12),plot(RMSE_flow17),
+plot(RMSE_flow21),
+legend('OPEN','EnKF','ExKF','1D','1Dopti','2D','2Dopti','2Dsopti1em2','2Dsopti1em3','2Dsopti1em4','3D','3Dopti','3Dsopti1em4');
+title('RMSE Flow'), xlabel('time (sec)'),ylabel('RMSE')
+% hold off
+% plotWFObs( Wp0,sol_array0,sys0,scriptOptions0,strucObs0 );
+% plotWFObs( Wp1,sol_array1,sys1,scriptOptions1,strucObs1 );
+% plotWFObs( Wp4,sol_array4,sys4,scriptOptions4,strucObs4 );
+% plotWFObs( Wp10,sol_array10,sys10,scriptOptions10,strucObs10 );
+% plotWFObs( Wp11,sol_array11,sys11,scriptOptions11,strucObs11 );
+% plotWFObs( Wp12,sol_array12,sys12,scriptOptions12,strucObs12 );
+% plotWFObs( Wp15,sol_array15,sys15,scriptOptions15,strucObs15 );
+% plotWFObs( Wp16,sol_array16,sys16,scriptOptions16,strucObs16 );
+% plotWFObs( Wp17,sol_array17,sys17,scriptOptions17,strucObs17 );
+% plotWFObs( Wp18,sol_array18,sys18,scriptOptions18,strucObs18 );
+% plotWFObs( Wp19,sol_array19,sys19,scriptOptions19,strucObs19 );
+% plotWFObs( Wp20,sol_array20,sys20,scriptOptions20,strucObs20 );
+% plotWFObs( Wp21,sol_array21,sys21,scriptOptions21,strucObs21 );
+%IFAC_2DZE_extremeopti_1em4%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+clear scriptOptions sol_array strucObs sys Wp
+load('C:\Users\Nivas Temp\Documents\Nivas\MSc Thesis\WFObs_Queue\2Turbine\axi_2turb_alm_turb_dexkf_IFAC_2DZE_uinf_noest_extremeopti_1em4\workspace.mat')
+scriptOptions.powerForecast = 0;
+% [pwWFSim22,timeWFSim22,~,~] = plotpower( Wp,sol_array,sys,scriptOptions,strucObs, 0 );
+for i = 1:Wp.sim.NN
+    time22(i) = sol_array(i).score.CPUtime;
+    RMSE22(i) = sol_array(i).score.RMSE_cline;
+    maxError22(i) = sol_array(i).score.maxError;
+    RMSE_flow22(i) = sol_array(i).score.RMSE_flow;
+end
+Wp22 = Wp; sol_array22 = sol_array; sys22 = sys; 
+scriptOptions22 = scriptOptions; strucObs22 = strucObs;
+%IFAC_3DZE_extremeopti_1em4%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+clear scriptOptions sol_array strucObs sys Wp
+load('C:\Users\Nivas Temp\Documents\Nivas\MSc Thesis\WFObs_Queue\2Turbine\axi_2turb_alm_turb_dexkf_IFAC_3DZE_uinf_noest_extremeopti_1em4\workspace.mat')
+scriptOptions.powerForecast = 0;
+% [pwWFSim23,timeWFSim23,~,~] = plotpower( Wp,sol_array,sys,scriptOptions,strucObs, 0 );
+for i = 1:Wp.sim.NN
+    time23(i) = sol_array(i).score.CPUtime;
+    RMSE23(i) = sol_array(i).score.RMSE_cline;
+    maxError23(i) = sol_array(i).score.maxError;
+    RMSE_flow23(i) = sol_array(i).score.RMSE_flow;
+end
+Wp23 = Wp; sol_array23 = sol_array; sys23 = sys; 
+scriptOptions23 = scriptOptions; strucObs23 = strucObs;
+x = [1:6];
+avg_time = [sum(time0)/length(time0),sum(time1)/length(time1),...
+    sum(time11)/length(time15),sum(time22)/length(time15),...
+    sum(time12)/length(time16),sum(time23)/length(time17)];
+RMSE_flow = [sum(RMSE_flow0)/length(RMSE_flow0),sum(RMSE_flow1)/length(RMSE_flow1),...
+    sum(RMSE_flow11)/length(RMSE_flow4),sum(RMSE_flow12)/length(RMSE_flow10),...
+    sum(RMSE_flow12)/length(RMSE_flow11),sum(RMSE_flow23)/length(RMSE_flow12)];
+maxError = [sum(maxError0)/length(maxError0),sum(maxError1/length(maxError1)),...
+    sum(maxError11)/length(maxError11),sum(maxError22)/length(maxError22),...
+    sum(maxError12)/length(maxError12),sum(maxError23)/length(maxError23)];
+figure, 
+yyaxis left, plot(x,avg_time,'--*'),
+ylabel('Average time (sec)')
+% yyaxis right, plot(x,RMSE_flow,':o')
+% ylabel('Average RMSE_flow')
+yyaxis right, plot(x,maxError,':o')
+ylabel('Average maxError')
+xticks(x)
+xticklabels({'OPEN','EnKF','2D','2Deopti1em4','3D','3Deopti1em4'})
+% xtickangle(90)
+title('Effect of estimation size') 
+figure,
+plot(RMSE_flow0), hold on,plot(RMSE_flow1),plot(RMSE_flow11),
+plot(RMSE_flow22),plot(RMSE_flow12),plot(RMSE_flow23),
+legend('OPEN','EnKF','2D','2Deopti1em4','3D','3Deopti1em4');
+title('RMSE Flow'), xlabel('time (sec)'),ylabel('RMSE')
+hold off
+plotWFObs( Wp22,sol_array22,sys22,scriptOptions22,strucObs22 );
+plotWFObs( Wp23,sol_array23,sys23,scriptOptions23,strucObs23 );
 
 figure, plot(RMSE0), hold on, plot(RMSE1), %plot(RMSE4), plot(RMSE10),
 plot(RMSE11),plot(RMSE12),
 % plot(RMSE15),plot(RMSE16),plot(RMSE17)
 plot(RMSE18),plot(RMSE19),plot(RMSE20),plot(RMSE21)
-legend('OPEN','EnKF','DExKF_IFAC:2DE','DExKF_IFAC:3DE','DExKF_IFAC:2DE_superopti_1em2','DExKF_IFAC:2DE_superopti_1em3','DExKF_IFAC:2DE_superopti_1em4','DExKF_IFAC:3DE_superopti_1em4')
+plot(RMSE22),plot(RMSE23)
+legend('OPEN','EnKF','DExKF_IFAC:2DE','DExKF_IFAC:3DE','DExKF_IFAC:2DE_superopti_1em2','DExKF_IFAC:2DE_superopti_1em3','DExKF_IFAC:2DE_superopti_1em4','DExKF_IFAC:3DE_superopti_1em4','DExKF_IFAC:2DE_extopti_1em4','DExKF_IFAC:3DE_extopti_1em4')
 title('RMSE_cline'), xlabel('Time (sec)'), ylabel('RMSE')
 figure, plot(maxError0), hold on, plot(maxError1), %plot(maxError4), plot(maxError10),
 plot(maxError11),plot(maxError12), 
 % plot(maxError15),plot(maxError16),plot(maxError17)
 plot(maxError18),plot(maxError19),plot(maxError20),plot(maxError21)
-legend('OPEN','EnKF','DExKF_IFAC:2DE','DExKF_IFAC:3DE','DExKF_IFAC:2DE_superopti_1em2','DExKF_IFAC:2DE_superopti_1em3','DExKF_IFAC:2DE_superopti_1em4','DExKF_IFAC:3DE_superopti_1em4')
+plot(maxError22),plot(maxError23)
+legend('OPEN','EnKF','DExKF_IFAC:2DE','DExKF_IFAC:3DE','DExKF_IFAC:2DE_superopti_1em2','DExKF_IFAC:2DE_superopti_1em3','DExKF_IFAC:2DE_superopti_1em4','DExKF_IFAC:3DE_superopti_1em4','DExKF_IFAC:2DE_extopti_1em4','DExKF_IFAC:3DE_extopti_1em4')
 title('maxError'), xlabel('Time (sec)'), ylabel('maxError')
 figure, plot(RMSE_flow0), hold on, plot(RMSE_flow1), %plot(RMSE_flow4),plot(RMSE_flow10),
 plot(RMSE_flow11),plot(RMSE_flow12), 
 % plot(RMSE_flow15),plot(RMSE_flow16),plot(RMSE_flow17)
 plot(RMSE_flow18),plot(RMSE_flow19),plot(RMSE_flow20),plot(RMSE_flow21)
-legend('OPEN','EnKF','DExKF_IFAC:2DE','DExKF_IFAC:3DE','DExKF_IFAC:2DE_superopti_1em2','DExKF_IFAC:2DE_superopti_1em3','DExKF_IFAC:2DE_superopti_1em4','DExKF_IFAC:3DE_superopti_1em4')
+plot(RMSE_flow22),plot(RMSE_flow23)
+legend('OPEN','EnKF','DExKF_IFAC:2DE','DExKF_IFAC:3DE','DExKF_IFAC:2DE_superopti_1em2','DExKF_IFAC:2DE_superopti_1em3','DExKF_IFAC:2DE_superopti_1em4','DExKF_IFAC:3DE_superopti_1em4','DExKF_IFAC:2DE_extopti_1em4','DExKF_IFAC:3DE_extopti_1em4')
 title('RMSE_flow'), xlabel('Time (sec)'), ylabel('RMSE_flow')
 
 hold off
@@ -527,6 +696,8 @@ plotWFObs( Wp18,sol_array18,sys18,scriptOptions18,strucObs18 );
 plotWFObs( Wp19,sol_array19,sys19,scriptOptions19,strucObs19 );
 plotWFObs( Wp20,sol_array20,sys20,scriptOptions20,strucObs20 );
 plotWFObs( Wp21,sol_array21,sys21,scriptOptions21,strucObs21 );
+plotWFObs( Wp22,sol_array22,sys22,scriptOptions22,strucObs22 );
+plotWFObs( Wp23,sol_array23,sys23,scriptOptions23,strucObs23 );
 %% Comparing the effect of different estimation size (EnKF, DExKF_IFAC:1D,2D,3D,4D)
 clear all
 close all

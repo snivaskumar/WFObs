@@ -41,11 +41,11 @@ X_b = T_tmp{2}*Z2*T_tmp{2}';
 % X_b(ia{2},ia{2}) = X_a(ia{2},ia{2});
 %%%%%%
 
-if type == 0
+if strcmp(type,'CIN')
     Zf      = X_a + X_b;
     zf      = x_a + x_b;
     0;
-elseif type == 1
+elseif strcmp(type,'CI2')
     % CI
     ZA      = X_a;
     ZB      = X_b;
@@ -55,7 +55,7 @@ elseif type == 1
     Zf      = omega*ZA + (1-omega)*ZB;
     zf      = omega*x_a + (1-omega)*x_b;
     1;
-elseif type == 2
+elseif strcmp(type,'EI')
     % EI
     [Si,Di] = eig(X_a);
     [Sj,Dj] = eig(pinv(Di^0.5)*pinv(Si)*X_b*Si*pinv(Di^0.5));
@@ -76,14 +76,14 @@ elseif type == 2
     zf  = x_a + x_b - xij;
     Zf  = X_a + X_b - Xij;
     2;
-elseif type == 3    
+elseif strcmp(type,'ICI')   
     % ICI
     ZA      = X_a;
     ZB      = X_b;
 % %     ff      = @(w) trace(pinv(ZA + ZB - ZA*pinv(w*ZB + (1-w)*ZA)*ZB)); % min -f = max f
-%     ff      = @(w) trace(-(ZA + ZB - ZA*pinv(w*ZB + (1-w)*ZA)*ZB)); % min -f = max f
-%     omega   = fminbnd(ff,0,1,optimset('Display','off'));
-    omega   = 0.5;
+    ff      = @(w) trace(-(ZA + ZB - ZA*inv(w*ZB + (1-w)*ZA)*ZB)); % min -f = max f
+    omega   = fminbnd(ff,0,1,optimset('Display','off'));
+%     omega   = 0.5;
     Xij     = ZA*inv(omega*ZB + (1-omega)*ZA)*ZB;
     Zf      = X_a + X_b - Xij;
 

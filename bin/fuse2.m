@@ -41,11 +41,11 @@ X_b = T_tmp{2}*Z2*T_tmp{2}';
 % X_b(ia{2},ia{2}) = X_a(ia{2},ia{2});
 %%%%%%
 
-if type == 0
+if strcmp(type,'CIN')
     Zf      = pinv(pinv(X_a) + pinv(X_b));
     zf      = Zf*(pinv(X_a)*x_a + pinv(X_b)*x_b);
     0;
-elseif type == 1
+elseif strcmp(type,'CI2')
     % CI
     ZA      = X_a;
     ZB      = X_b;
@@ -54,7 +54,7 @@ elseif type == 1
     Zf      = pinv(omega*pinv(ZA) + (1-omega)*pinv(ZA));
     zf      = Zf*(omega*pinv(ZA)*x_a + (1-omega)*pinv(ZB)*x_b);
     1;
-elseif type == 2
+elseif strcmp(type,'EI')
     % EI
     [Si,Di] = eig(X_a);
     [Sj,Dj] = eig(pinv(Di^0.5)*pinv(Si)*X_b*Si*pinv(Di^0.5));
@@ -75,7 +75,7 @@ elseif type == 2
     Zf  = pinv(pinv(X_a) + pinv(X_b) - pinv(Xij));
     zf  = Zf*(inv(X_a)*x_a + inv(X_b)*x_b - inv(X_ij)*xij);
     2;
-elseif type == 3    
+elseif strcmp(type,'ICI')
     % ICI
     ZA      = X_a;
     ZB      = X_b;

@@ -1,22 +1,36 @@
 function [Wp,sol_out,strucObs] = WFObs_o_dexkf(strucObs,Wp,sys_in,sol_in,options)
 
+type        = upper(strucObs.fusion_type);
+typeCZ      = upper(strucObs.typeCZ);
+typeWeight  = upper(strucObs.IFACWeight);
 if sol_in.k == 1
-    if strucObs.fusion_type == 0     % CI = 0,1; EI = 2; ICI = 3, IFAC = 4
+    if strcmp(type,'CIN')     % CI = 0,1; EI = 2; ICI = 3, IFAC = 4
         disp('Type of fusion: CI (Naive Method)')
-    elseif strucObs.fusion_type == 1
+    elseif strcmp(type,'CI2')
+        disp('Type of fusion: CI2')
+    elseif strcmp(type,'CI')
         disp('Type of fusion: CI')
-    elseif strucObs.fusion_type == 2
+    elseif strcmp(type,'EI')
         disp('Type of fusion: EI')
-    elseif strucObs.fusion_type == 3
+    elseif strcmp(type,'ICI')
         disp('Type of fusion: ICI')   
-    elseif strucObs.fusion_type == 4
-        disp('Type of fusion: IFAC')
+    elseif strcmp(type,'IFAC')
+        if strucObs.IFAC_type == 2
+            disp('Type of fusion: IFAC (Based on both measurement and prior info.)');
+        else
+            disp('Type of fusion: IFAC (Based only on measurement)')
+        end
+        if strcmp(typeWeight,'OPTIMAL')
+            disp('Weight: Optimal');
+        elseif strcmp(typeWeight,'CONSTANT')
+            disp('Weight: Constant');
+        end
     else
         disp('No fusion')
     end
-    if strucObs.typeCZ == 1         % 1 if Z = Co-Variance, 2 if Z = Information
+    if strcmp(typeCZ,'C')         % 1 if Z = Co-Variance, 2 if Z = Information
         disp('Type of filter: Conv. KF')
-    else
+    elseif strcmp(typeCZ,'Z')
         disp('Type of filter: Info. KF')
     end
     if strucObs.Subsys_length <= 5
@@ -38,6 +52,11 @@ if sol_in.k == 1
         disp('Super Optimize: No');
     else
         fprintf('Super Optimize: Yes, with a factor of %.2d.\n',strucObs.superOptimizeFactor);
+    end
+    if strucObs.extremeOptimize == 0
+        disp('Extreme Optimize: No');
+    else
+        fprintf('Extreme Optimize: Yes, with a factor of %.2d.\n',strucObs.superOptimizeFactor);
     end
 end
 
@@ -154,8 +173,8 @@ RR      = strucObs.R_k*eye(lop,lop);
 % tic
 RD              = Wp.turbine.Drotor;
 Subsys_length   = strucObs.Subsys_length;
-type            = strucObs.fusion_type;
-typeCZ          = strucObs.typeCZ;
+% type            = upper(strucObs.fusion_type);
+% typeCZ          = strucObs.typeCZ;
 % tic
 if (sol_in.k == 1) || (rem(sol_in.k,NL) == 0)
     [x,d,p, F,D,E,G,H,Q,R,l,n,x_est,x_unest, P_unest] = subsystem_turbine(strucObs,sol_in, p,Fk,Bk,Ck,QQ,RR, tur,state,strucObs.turbine, Subsys_length,RD, Sk1k1);

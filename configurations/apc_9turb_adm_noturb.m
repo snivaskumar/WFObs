@@ -62,6 +62,10 @@ switch lower(strucObs.filtertype)
                                             % 100 if linearize the non-linear system every 100 iterations
                                             % N if linearize the non-linear system every N iterations
                                             % Inf if linearize the non-linear system only at the first iteration
+        strucObs.Optimize       = 1;        % (consider only diagonal of Slee, Slfe, Slde) 0 = Unoptimized, 1 = Optimized
+        strucObs.superOptimize  = 1;        % (superOptimize = if E{i}(j,k)<factor, E{i}(j,k) = 0 )
+        strucObs.superOptimizeFactor  = 1e-2;
+        strucObs.extremeOptimize         = 1;
         
     % Distributed Unscented Kalman filter (UKF)    
     case {'dukf'}

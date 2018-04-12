@@ -107,6 +107,12 @@ Q   = cell(tur,1);
 R   = cell(tur,1);
 y   = cell(tur,1);
 % tic
+if strucObs.extremeOptimize == 1
+    factor          = strucObs.superOptimizeFactor;
+    indices         = find( abs(A)<factor );
+    A(indices)      = 0;
+    A               = sparse( A );
+end
 for i = 1:tur
     F{i}    = A( x{i},x{i} );
     D{i}    = A( x{i},d{i} );
