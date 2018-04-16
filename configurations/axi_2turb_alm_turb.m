@@ -33,7 +33,7 @@ strucObs.measFlow    = true;   % Use flow measurements (LIDAR) in estimates
 strucObs.sensorsPath = 'sensors_2turb_alm'; % measurement setup filename (see '/setup_sensors/sensors_layouts')
         
 % Kalman filter settings
-strucObs.filtertype = 'dexkf'; % Observer types are outlined next
+strucObs.filtertype = 'exkf'; % Observer types are outlined next
 switch lower(strucObs.filtertype)
     % Distributed Extended Kalman filter (ExKF)
     case {'dexkf'}
