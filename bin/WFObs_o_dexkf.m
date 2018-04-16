@@ -137,6 +137,19 @@ if (sol_in.k == 1) || (rem(sol_in.k,NL) == 0)
 %     strucObs.Bk     = Bk;
 %     strucObs.Ck     = Ck;
 %     strucObs.state  = state;
+
+% % % %     f = 1e-4;
+% % % %     figure, spy(abs(Fk)>=f)
+% % % %     if sol_in.k ~= 1
+% % % %         trace(abs(Fk));
+% % % %         trace(abs(Fk - strucObs.Fk));
+% % % %         (trace(abs(Fk - strucObs.Fk))/trace(abs(Fk)))*100
+% % % %         sum(sum(abs(Fk)));
+% % % %         sum(sum(abs(Fk - strucObs.Fk)));
+% % % %         (sum(sum(abs(Fk - strucObs.Fk)))/sum(sum(abs(Fk))))*100
+% % % %         figure, spy(abs(Fk - strucObs.Fk)>f)
+% % % %         (nnz(abs(Fk - strucObs.Fk)>f)/nnz(abs(Fk)>f))*100
+% % % %     end
     
     strucObs.Fk     = Fk;
     strucObs.Bk     = Bk;

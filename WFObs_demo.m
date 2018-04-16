@@ -67,7 +67,7 @@ scriptOptions.printConvergence  = 0;  % Print convergence parameters every times
 
 % Visualization settings
 scriptOptions.plotMesh          = 0;  % Show meshing and turbine locations
-scriptOptions.Animate           = 50;  % Show results every x iterations (0: no plots)
+scriptOptions.Animate           = 200;  % Show results every x iterations (0: no plots)
    scriptOptions.plotContour    = 1;  % Show flow fields
    scriptOptions.plotPower      = 1;  % Plot true and predicted power capture vs. time
     scriptOptions.powerForecast = 0;  % Plot power forecast (0 = disabled, x = number of steps) (only if plotPower = 1)
@@ -88,6 +88,6 @@ configName = 'axi_2turb_alm_turb';
 % + subsystem_length: 1D + typeCZ: Z
 %% Execute the WFObs core code (+ overwrite meshing.m settings, if applicable)
 WpOverwrite = struct(); % Struct to overwrite settings from meshing.m
-WpOverwrite.sim.NN = 500; % Stop after [x] steps
+WpOverwrite.sim.NN = 1995; % Stop after [x] steps
 run('WFObs_addpaths.m'); % Import libraries for WFObs & WFSim
 outputData = WFObs_core(scriptOptions,configName,WpOverwrite);

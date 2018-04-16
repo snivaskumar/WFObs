@@ -1,0 +1,7 @@
+#PBS -l nodes=1:ppn=8
+#PBS -m ae 				
+#PBS -M n.k.sureshkumar@student.tudelft.nl 	
+
+module load 'matlab/2017b'
+cd $HOME/WFObs
+matlab -nodisplay -noFigureWindows -logfile 'batchJob_out.log' -r WFObs_batchJob

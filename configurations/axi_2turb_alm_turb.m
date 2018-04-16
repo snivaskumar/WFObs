@@ -33,14 +33,14 @@ strucObs.measFlow    = true;   % Use flow measurements (LIDAR) in estimates
 strucObs.sensorsPath = 'sensors_2turb_alm'; % measurement setup filename (see '/setup_sensors/sensors_layouts')
         
 % Kalman filter settings
-strucObs.filtertype = 'sim'; % Observer types are outlined next
+strucObs.filtertype = 'exkf'; % Observer types are outlined next
 switch lower(strucObs.filtertype)
     % Distributed Extended Kalman filter (ExKF)
     case {'dexkf'}
         % Covariances
-        strucObs.R_k = 1.0; % Measurement   covariance matrix
-        strucObs.Q_k = 1.0; % Process noise covariance matrix
-        strucObs.P_0 = 0.5; % Initial state covariance matrix
+        strucObs.R_k = 1.0; % 1.0; % Measurement   covariance matrix
+        strucObs.Q_k = 0.10; % 1.0; % Process noise covariance matrix
+        strucObs.P_0 = 0.5; % 0.5; % Initial state covariance matrix
         strucObs.stateEst = true;  % Estimate model states
 
         % Other model settings
@@ -49,7 +49,7 @@ switch lower(strucObs.filtertype)
     
         strucObs.tune.est  = false; % Estimate model parameters
         
-        strucObs.Subsys_length  = 2;        % Length of the subsystem around each turbine 
+        strucObs.Subsys_length  = 3;        % Length of the subsystem around each turbine 
                                 % Subsys_length = 1  if Subsys_length = 1D
                                 % (D = Rotor length)
                                 % Subsys_length = 2  if Subsys_length = 2D
@@ -58,7 +58,7 @@ switch lower(strucObs.filtertype)
                                 % Subsys_length = x  if Subsys_length = x
         strucObs.fusion_type    = 'ifac';   % CI = 0,1; EI = 2; ICI = 3, IFAC = 4, No fusion = 5
         strucObs.IFAC_type      = 1;        % 1 for z_k, 2 for z_k and x_p
-        strucObs.IFACWeight     = 'optimal';% Optimal or Constant
+        strucObs.IFACWeight     = 'constant';% Optimal or Constant
         strucObs.typeCZ         = 'z';      % C = Co-Variance, Z = Information
         strucObs.linearize_freq = Inf;      % 50 if linearize the non-linear system every 50 iterations
                                             % 100 if linearize the non-linear system every 100 iterations

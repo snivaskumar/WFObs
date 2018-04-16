@@ -630,6 +630,19 @@ for i = 1:Wp.sim.NN
 end
 Wp23 = Wp; sol_array23 = sol_array; sys23 = sys; 
 scriptOptions23 = scriptOptions; strucObs23 = strucObs;
+%IFAC_2DZE_extremeopti_1em4_Q1em1%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+clear scriptOptions sol_array strucObs sys Wp
+load('C:\Users\Nivas Temp\Documents\Nivas\MSc Thesis\WFObs_Queue\2Turbine\axi_2turb_alm_turb_dexkf_IFAC_2DZE_uinf_noest_eopti_1em4_Q1em1\workspace.mat')
+scriptOptions.powerForecast = 0;
+for i = 1:Wp.sim.NN
+    time24(i) = sol_array(i).score.CPUtime;
+    RMSE24(i) = sol_array(i).score.RMSE_cline;
+    maxError24(i) = sol_array(i).score.maxError;
+    RMSE_flow24(i) = sol_array(i).score.RMSE_flow;
+end
+Wp24 = Wp; sol_array24 = sol_array; sys24 = sys; 
+scriptOptions24 = scriptOptions; strucObs24 = strucObs;
+
 x = [1:6];
 avg_time = [sum(time0)/length(time0),sum(time1)/length(time1),...
     sum(time11)/length(time15),sum(time22)/length(time15),...

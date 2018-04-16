@@ -64,6 +64,25 @@ sol_out.x   = solf.x + Kgain*(measuredData.sol(strucObs.obs_array)...
                  -solf.x(strucObs.obs_array)); % Optimally predicted state vector
 strucObs.Pk = (eye(size(Pf))-Kgain*strucObs.Htt)*Pf;  % State covariance matrix
 
+% Pk1k1   = strucObs.Pk;
+% R       = strucObs.R_k;
+% Q       = strucObs.Q_k; 
+% y       = measuredData.sol(strucObs.obs_array); 
+% C       = strucObs.Htt; 
+% n       = length(Fk);
+% 
+% xkk1    = solf.x;
+% Pkk1    = Fk*Pk1k1*Fk' + Q;
+% dy      = y - C*xkk1;
+% Pyy     = R + C*Pkk1*C';
+% Pxy     = Pkk1*C';
+% K       = Pxy*inv(Pyy);
+% xkk     = xkk1 + K*dy;
+% Pkk     = ( eye(n,n) - K*C )*Pkk1;
+% 
+% sol_out.x   = xkk;
+% strucObs.Pk = Pkk;
+
 % Export new solution from estimation
 [sol_out,~]  = MapSolution(Wp,sol_out,Inf,options); % Map solution to flowfields
 [~,sol_out]  = Actuator(Wp,sol_out,options);        % Recalculate power after analysis update
