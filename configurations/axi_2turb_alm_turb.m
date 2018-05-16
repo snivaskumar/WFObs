@@ -49,7 +49,7 @@ switch lower(strucObs.filtertype)
     
         strucObs.tune.est  = false; % Estimate model parameters
         
-        strucObs.Subsys_length  = 3;        % Length of the subsystem around each turbine 
+        strucObs.Subsys_length  = 2;        % Length of the subsystem around each turbine 
                                 % Subsys_length = 1  if Subsys_length = 1D
                                 % (D = Rotor length)
                                 % Subsys_length = 2  if Subsys_length = 2D
@@ -119,11 +119,15 @@ switch lower(strucObs.filtertype)
         scriptOptions.exportPressures = false; % Model/predict/filter pressure terms
         scriptOptions.Linearversion   = true;  % Calculate linearized system matrices: necessary for ExKF
         
-        strucObs.linearize_freq = Inf;       % 50 if linearize the non-linear system every 50 iterations
-                                            % 100 if linearize the non-linear system every 100 iterations
-                                            % N if linearize the non-linear system every N iterations
-                                            % Inf if linearize the non-linear system only at the first iteration
-        
+        strucObs.linearize_freq = Inf;  % 50 if linearize the non-linear system every 50 iterations
+                                        % 100 if linearize the non-linear system every 100 iterations
+                                        % N if linearize the non-linear system every N iterations
+                                        % Inf if linearize the non-linear system only at the first iteration
+        strucObs.localize   = 0;        % 1 for localised, 2 for complete
+        strucObs.l_locl     = 2*131;
+        strucObs.stateEst   = true;     % Estimate model states
+        strucObs.tune.est   = false;    % Estimate model parameters
+                                            
     % Sliding mode observer (SMO)    
     case {'smo'}
         % tuning parameters

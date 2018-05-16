@@ -46,6 +46,7 @@ if (sol_in.k == 1) || (rem(sol_in.k,NL) == 0)
 end
 Fk = strucObs.Fk;
 Bk = strucObs.Bk;
+n  = length(Fk);
 
 % Neglect pressure terms
 if ~options.exportPressures 
@@ -56,6 +57,56 @@ end;
 
 Pf = Fk*strucObs.Pk*Fk' + strucObs.Q_k;  % Covariance matrix P for x(k) knowing y(k-1)
 
+if strucObs.localize
+    if sol_in.k == 1
+        if strucObs.stateEst || strucObs.measFlow
+            stateLocArray = zeros(strucObs.size_output,2);
+            for iii = 1:strucObs.size_output
+                [~,loci,~]           = WFObs_s_sensors_nr2grid(iii,Wp.mesh);
+                stateLocArray(iii,:) = [loci.x, loci.y];
+            end
+        end
+
+        % Generate the locations of all turbines
+        if strucObs.tune.est || strucObs.measPw
+            turbLocArray = zeros(Wp.turbine.N,2);
+            for iii = 1:Wp.turbine.N
+                turbLocArray(iii,:) = [Wp.turbine.Crx(iii),Wp.turbine.Cry(iii)];
+            end
+        end
+
+        % Generate the locations of all outputs
+        outputLocArray = [];
+        if strucObs.measFlow
+            outputLocArray = [outputLocArray; stateLocArray(strucObs.obs_array,:)];
+        end
+        if strucObs.measPw
+            outputLocArray = [outputLocArray; turbLocArray];
+        end
+        if strucObs.stateEst
+            rho_locl.cross = sparse(strucObs.size_output,strucObs.size_output);
+            for iii = 1:strucObs.size_output % Loop over all default states
+                loc1 = stateLocArray(iii,:);
+                for jjj = 1:length(strucObs.obs_array) % Loop over all measurements
+                    loc2 = outputLocArray(jjj,:);
+                    dx = sqrt(sum((loc1-loc2).^2)); % displacement between state and output
+                    if dx <= strucObs.l_locl
+                        strucObs.rho_locl(iii,iii) = 1;
+                    else
+                        strucObs.rho_locl(iii,iii) = 0;
+                    end;
+                end
+            end
+            clear iii jjj dx loc1 loc2
+        else
+            rho_locl.cross = [];
+        end
+    end
+    % spy(Pf)
+    Pf = strucObs.rho_locl*Pf;
+    % figure, spy(Pf)    
+end
+    
 % ExKF analysis update
 sol_out     = sol_in; % Copy previous solution before updating x
 Kgain       = Pf(:,strucObs.obs_array)*pinv(Pf(strucObs.obs_array,...
