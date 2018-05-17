@@ -33,7 +33,7 @@ strucObs.measFlow    = true;   % Use flow measurements (LIDAR) in estimates
 strucObs.sensorsPath = 'sensors_2turb_alm'; % measurement setup filename (see '/setup_sensors/sensors_layouts')
         
 % Kalman filter settings
-strucObs.filtertype = 'dexkf'; % Observer types are outlined next
+strucObs.filtertype = 'enkf'; % Observer types are outlined next
 switch lower(strucObs.filtertype)
     % Distributed Extended Kalman filter (ExKF)
     case {'dexkf'}
@@ -123,7 +123,7 @@ switch lower(strucObs.filtertype)
                                         % 100 if linearize the non-linear system every 100 iterations
                                         % N if linearize the non-linear system every N iterations
                                         % Inf if linearize the non-linear system only at the first iteration
-        strucObs.localize   = 0;        % 1 for localised, 2 for complete
+        strucObs.localize   = 0;        % 1 for localised
         strucObs.l_locl     = 2*131;
         strucObs.stateEst   = true;     % Estimate model states
         strucObs.tune.est   = false;    % Estimate model parameters

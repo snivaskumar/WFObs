@@ -4,4 +4,4 @@
 
 module load 'matlab/2017b'
 cd $HOME/WFObs
-matlab -nodisplay -noFigureWindows -logfile 'batchJob_out.log' -r WFObs_batchJob
+matlab -nodisplay -noFigureWindows -logfile 'ExKF_uinf11_noest.log' -r WFObs_batchJob
