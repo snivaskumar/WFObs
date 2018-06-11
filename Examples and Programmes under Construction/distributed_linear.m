@@ -1,4 +1,4 @@
-function [xkk Pkk] = distributed_linear( strucObs,x,d,p,hr,n, F,D,E,G,H,Q,R, yy, xkk1,xk1k1,Sk1k1, x_est,x_unest, P_unest, type,typeCZ );
+function [xkk Pkk omega] = distributed_linear( strucObs,x,d,p,hr,n, F,D,E,G,H,Q,R, yy, xkk1,xk1k1,Sk1k1, x_est,x_unest, P_unest, type,typeCZ, weight,constant );
 % [xkk Pkk] = distributed_linear( x,d,F,D,G,H,Q,R, y, xkk1,xk1k1,Sk1k1, type );
 % tic
 % xkk1    = xkk1(p);
@@ -6,7 +6,7 @@ function [xkk Pkk] = distributed_linear( strucObs,x,d,p,hr,n, F,D,E,G,H,Q,R, yy,
 % Sk1k1   = Sk1k1(p,p);
 % [Y,I] = sort(p);
 % toc
-
+omega = [];
 % Prediction
 Slff = cell(hr,1);
 Slfd = cell(hr,1);
@@ -141,10 +141,13 @@ nnn = hr;
 zf = zlkk;
 Pf = Zlkk;
 xf = x;
+filter          = strucObs.filtertype; 
+iteration       = strucObs.fusion_CIiteration; 
 if strcmp(type,'CIN')||strcmp(type,'CI2')||strcmp(type,'EI')||strcmp(type,'ICI')
     zfkk = cell(ceil(hr/2),1);
     Pfkk = cell(ceil(hr/2),1);
     xfkk = cell(ceil(hr/2),1);
+    omega = cell(ceil(hr/2),1);
     if nnn ~= 1
         if rem(nnn,2) == 0
             nnn = nnn;
@@ -159,19 +162,19 @@ if strcmp(type,'CIN')||strcmp(type,'CI2')||strcmp(type,'EI')||strcmp(type,'ICI')
             parfor i = 1:(nnn)
                 ii = i + (i - 1);
                 if strcmp(typeCZ,'C')
-                    [zfkk{i}, Pfkk{i}, xfkk{i}]  = fuse2(zf{ii},zf{ii+1},Pf{ii},Pf{ii+1},xf{ii},xf{ii+1},type);
+                    [zfkk{i}, Pfkk{i}, xfkk{i}]  = fuse2(zf{ii},zf{ii+1},Pf{ii},Pf{ii+1},xf{ii},xf{ii+1},type, weight,constant,iteration,filter);
                 elseif strcmp(typeCZ,'Z')
-                    [zfkk{i}, Pfkk{i}, xfkk{i}]  = fuze2(zf{ii},zf{ii+1},Pf{ii},Pf{ii+1},xf{ii},xf{ii+1},type);
+                    [zfkk{i}, Pfkk{i}, xfkk{i}, omega{i}]  = fuze2(zf{ii},zf{ii+1},Pf{ii},Pf{ii+1},xf{ii},xf{ii+1},type, weight,constant,iteration);
                 end
             end
             if flag == 1
                 loc = (nnn);
                 if strcmp(typeCZ,'C')
                     [zfkk{loc}, Pfkk{loc}, xfkk{loc}]  = ...
-                        fuse2(zfkk{loc},zf{2*nnn+1},Pfkk{loc},Pf{2*nnn+1},xfkk{loc},xf{2*nnn+1},type);
+                        fuse2(zfkk{loc},zf{2*nnn+1},Pfkk{loc},Pf{2*nnn+1},xfkk{loc},xf{2*nnn+1},type, weight,constant,iteration,filter);
                 elseif strcmp(typeCZ,'Z')
-                    [zfkk{loc}, Pfkk{loc}, xfkk{loc}]  = ...
-                            fuze2(zfkk{loc},zf{2*nnn+1},Pfkk{loc},Pf{2*nnn+1},xfkk{loc},xf{2*nnn+1},type);
+                    [zfkk{loc}, Pfkk{loc}, xfkk{loc}, omega{loc}]  = ...
+                            fuze2(zfkk{loc},zf{2*nnn+1},Pfkk{loc},Pf{2*nnn+1},xfkk{loc},xf{2*nnn+1},type, weight,constant,iteration);
                 end
             end
             if nnn == 1
@@ -179,6 +182,7 @@ if strcmp(type,'CIN')||strcmp(type,'CI2')||strcmp(type,'EI')||strcmp(type,'ICI')
                 zkk     = zfkk{1};
                 Pkk     = Pfkk{1};
                 xfkk    = xfkk{1};  
+                omega   = omega{1};
             else
                 zf = zfkk;
                 Pf = Pfkk;

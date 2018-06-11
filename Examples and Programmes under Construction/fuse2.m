@@ -1,4 +1,4 @@
-function [zf, Zf, xf] = fuse2(z1,z2,Z1,Z2,x1,x2,type);
+function [zf, Zf, xf, omega] = fuse2(z1,z2,Z1,Z2,x1,x2,type,fusion_weight,constant,iteration,filter);
 % [zf, Zf, xf] = fuze2(z1,z2,Z1,Z2,x1,x2,type);
 % type    1 for CI, 2 for EI, 3 for ICI
 
@@ -41,20 +41,57 @@ X_b = T_tmp{2}*Z2*T_tmp{2}';
 % X_b(ia{2},ia{2}) = X_a(ia{2},ia{2});
 %%%%%%
 
-if type == 0
-    Zf      = pinv(pinv(X_a) + pinv(X_b));
-    zf      = Zf*(pinv(X_a)*x_a + pinv(X_b)*x_b);
+omega = [];
+if strcmp(type,'CIN')
+    ZA      = X_a;
+    ZB      = X_b;
+    
+%     if strcmp(filter,'exkf')
+        ZAA     = pinv(ZA);
+        ZBB     = pinv(ZB);
+%     else
+%         ZAA     = inv(ZA);
+%         ZBB     = inv(ZB);
+%     end
+    Zf      = inv( ZAA + ZBB );
+    zf      = Zf*( ZAA*x_a + ZBB*x_b );
+    
+% %     Zf      = inv(pinv(X_a) + pinv(X_b));
+% %     zf      = Zf*(pinv(X_a)*x_a + pinv(X_b)*x_b);
     0;
-elseif type == 1
+elseif strcmp(type,'CI2')
     % CI
     ZA      = X_a;
     ZB      = X_b;
-    f       = @(w) trace( pinv(w*pinv(ZA) + (1-w)*pinv(ZA)) ); % arg (min -f) = arg (max f)
-    omega   = fminbnd(f,0,1,optimset('Display','off'));
-    Zf      = pinv(omega*pinv(ZA) + (1-omega)*pinv(ZA));
-    zf      = Zf*(omega*pinv(ZA)*x_a + (1-omega)*pinv(ZB)*x_b);
+%     if strcmp(filter,'exkf')
+        ZAA     = pinv(ZA);
+        ZBB     = pinv(ZB);
+%     else
+%         ZAA     = inv(ZA);
+%         ZBB     = inv(ZB);
+%     end
+    if strcmp(fusion_weight,'OPTIMAL')
+        f       = @(w) trace( inv(w*ZAA + (1-w)*ZBB) ); % arg (min -f) = arg (max f)
+        options = optimset('MaxIter',iteration,'Display','off');
+        omega   = fminbnd(f,0,1,options);
+    else
+        omega   = constant;
+    end
+    omega;
+    Zf      = inv( omega*ZAA + (1-omega)*ZBB );
+    zf      = Zf*( omega*ZAA*x_a + (1-omega)*ZBB*x_b );
+    
+% %     if strcmp(fusion_weight,'OPTIMAL')
+% %         f       = @(w) trace( inv(w*pinv(ZA) + (1-w)*pinv(ZB)) ); % arg (min -f) = arg (max f)
+% %         omega   = fminbnd(f,0,1,optimset('Display','off'));
+% %     else
+% %         omega   = constant;
+% %     end
+% %     omega
+% %     Zf      = inv(omega*pinv(ZA) + (1-omega)*pinv(ZB));
+% %     zf      = Zf*(omega*pinv(ZA)*x_a + (1-omega)*pinv(ZB)*x_b);
     1;
-elseif type == 2
+elseif strcmp(type,'EI')
     % EI
     [Si,Di] = eig(X_a);
     [Sj,Dj] = eig(pinv(Di^0.5)*pinv(Si)*X_b*Si*pinv(Di^0.5));
@@ -75,17 +112,52 @@ elseif type == 2
     Zf  = pinv(pinv(X_a) + pinv(X_b) - pinv(Xij));
     zf  = Zf*(inv(X_a)*x_a + inv(X_b)*x_b - inv(X_ij)*xij);
     2;
-elseif type == 3    
+elseif strcmp(type,'ICI')
     % ICI
     ZA      = X_a;
     ZB      = X_b;
-    ff      = @(w) trace( (pinv(ZA) + pinv(ZB) - pinv(w*ZA + (1-w)*ZB))); % min -f = max f
-    omega   = fminbnd(ff,0,1,optimset('Display','off'));
+    
+    if strcmp(filter,'exkf')
+        ZAA     = pinv(ZA);
+        ZBB     = pinv(ZB);
+    else
+        ZAA     = inv(ZA);
+        ZBB     = inv(ZB);
+    end
+    if strcmp(fusion_weight,'OPTIMAL')
+% %         ff      = @(w) trace( (pinv(ZA) + pinv(ZB) - inv(w*ZA + (1-w)*ZB))); % min -f = max f
+        ff      = @(w) trace( inv(ZAA + ZBB - inv(w*ZA+(1-w)*ZB)) );
+        options = optimset('MaxIter',iteration,'Display','off');
+        omega   = fminbnd(ff,0,1,options);
+    else
+        omega   = constant;
+    end
+    omega;
     Xij     = omega*ZA + (1-omega)*ZB;
-    Zf      = pinv(pinv(X_a) + pinv(X_b) - pinv(Xij));
+    if strcmp(filter,'exkf')
+        Zij     = pinv(Xij); 
+    else
+        Zij     = inv(Xij); 
+    end
+    Zf      = inv(ZAA + ZBB - Zij);
 
-    K = Zf*(pinv(X_a) - omega*pinv(Xij));
-    L = Zf*(pinv(X_b) - (1 - omega)*pinv(Xij));
+    K = Zf*(ZAA - omega*Zij);
+    L = Zf*(ZBB - (1 - omega)*Zij);
+    
+% %     if strcmp(fusion_weight,'OPTIMAL')
+% % % %         ff      = @(w) trace( (pinv(ZA) + pinv(ZB) - inv(w*ZA + (1-w)*ZB))); % min -f = max f
+% %         ff      = @(w) trace( inv(pinv(ZA) + pinv(ZB) - inv(w*ZA+(1-w)*ZB)) );
+% %         options = optimset('MaxIter',iteration,'Display','off');
+% %         omega   = fminbnd(ff,0,1,options);
+% %     else
+% %         omega   = constant;
+% %     end
+% %     omega;
+% %     Xij     = omega*ZA + (1-omega)*ZB;
+% %     Zf      = inv(pinv(X_a) + pinv(X_b) - inv(Xij));
+% % 
+% %     K = Zf*(pinv(X_a) - omega*pinv(Xij));
+% %     L = Zf*(pinv(X_b) - (1 - omega)*pinv(Xij));
     zf = K*x_a + L*x_b;
     3;
 end

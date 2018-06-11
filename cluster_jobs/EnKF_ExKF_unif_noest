@@ -3,5 +3,5 @@
 #PBS -M n.k.sureshkumar@student.tudelft.nl 	
 
 module load 'matlab/2017b'
-cd $HOME/WFObs
-matlab -nodisplay -noFigureWindows -logfile 'ExKF_uinf11_noest.log' -r WFObs_batchJob
+cd $HOME/dWFObs_fullmesh_fullest
+matlab -nodisplay -noFigureWindows -logfile 'DDExKF_uinf5_noest_fus_turbC.log' -r WFObs_batchJob

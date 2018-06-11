@@ -3,6 +3,16 @@ function [Wp,sol_out,strucObs] = WFObs_o_dexkf(strucObs,Wp,sys_in,sol_in,options
 type        = upper(strucObs.fusion_type);
 typeCZ      = upper(strucObs.typeCZ);
 typeWeight  = upper(strucObs.IFACWeight);
+weight      = upper(strucObs.CIWeight);
+if sol_in.k == 1
+%     weight = 'OPTIMAL';
+    constant    = strucObs.CIConstantWeight;
+else
+    constant    = strucObs.omega;
+end
+if (rem(sol_in.k,10) == 0)
+    weight = 'OPTIMAL';
+end
 if sol_in.k == 1
     if strcmp(type,'CIN')     % CI = 0,1; EI = 2; ICI = 3, IFAC = 4
         disp('Type of fusion: CI (Naive Method)')
@@ -208,7 +218,7 @@ l       = strucObs.subsystem.l;         n       = strucObs.subsystem.n;
 x_est   = strucObs.subsystem.x_est;     x_unest = strucObs.subsystem.x_unest;
 P_unest = strucObs.subsystem.P_unest;
 % tic
-[xkk Pkk] = distributed_linear( strucObs,x,d,p,l,n, F,D,E,G,H,Q,R, y, xkk1,xk1k1,Sk1k1, x_est,x_unest, P_unest, type,typeCZ );
+[xkk Pkk strucObs.omega] = distributed_linear( strucObs,x,d,p,l,n, F,D,E,G,H,Q,R, y, xkk1,xk1k1,Sk1k1, x_est,x_unest, P_unest, type,typeCZ, weight,constant );
 % toc
 
 sol_out.x   = xkk;

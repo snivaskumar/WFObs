@@ -67,7 +67,7 @@ scriptOptions.printConvergence  = 0;  % Print convergence parameters every times
 
 % Visualization settings
 scriptOptions.plotMesh          = 0;  % Show meshing and turbine locations
-scriptOptions.Animate           = 200;  % Show results every x iterations (0: no plots)
+scriptOptions.Animate           = 1995;  % Show results every x iterations (0: no plots)
    scriptOptions.plotContour    = 1;  % Show flow fields
    scriptOptions.plotPower      = 1;  % Plot true and predicted power capture vs. time
     scriptOptions.powerForecast = 0;  % Plot power forecast (0 = disabled, x = number of steps) (only if plotPower = 1)
@@ -77,8 +77,8 @@ scriptOptions.Animate           = 200;  % Show results every x iterations (0: no
 % Saving settings
 scriptOptions.savePlots         = 1;  % Save all plots in external files at each time step
 scriptOptions.saveWorkspace     = 1;  % Save complete workspace at the end of simulation
-% scriptOptions.savePath          = ['/Users/Nivas_Kumar/Documents/NivasStudyMaterials/TUDelft/EnKF+WFSim/WFObs/results/tmp']; % Destination folder of saved files
-scriptOptions.savePath          = ['C:\Users\Nivas Temp\Documents\Nivas\MSc Thesis\WFObs\results\tmp']; % Destination folder of saved files
+scriptOptions.savePath          = ['/Users/Nivas_Kumar/Documents/NivasStudyMaterials/TUDelft/EnKF+WFSim/WFObs/results/tmp']; % Destination folder of saved files
+% scriptOptions.savePath          = ['C:\Users\Nivas Temp\Documents\Nivas\MSc Thesis\WFObs\results\tmp']; % Destination folder of saved files
 
 % Configuration file
 % configName = 'apc_9turb_alm_turb_dexkf_IFAC1DZ';

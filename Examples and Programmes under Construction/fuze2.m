@@ -1,4 +1,4 @@
-function [zf, Zf, xf] = fuze2(z1,z2,Z1,Z2,x1,x2,type);
+function [zf, Zf, xf, omega] = fuze2(z1,z2,Z1,Z2,x1,x2,type, weight,constant,iteration );
 % [zf, Zf, xf] = fuze2(z1,z2,Z1,Z2,x1,x2,type);
 % type    1 for CI, 2 for EI, 3 for ICI
 
@@ -41,20 +41,28 @@ X_b = T_tmp{2}*Z2*T_tmp{2}';
 % X_b(ia{2},ia{2}) = X_a(ia{2},ia{2});
 %%%%%%
 
-if type == 0
+omega = [];
+if strcmp(type,'CIN')
     Zf      = X_a + X_b;
     zf      = x_a + x_b;
     0;
-elseif type == 1
+elseif strcmp(type,'CI2')
     % CI
     ZA      = X_a;
     ZB      = X_b;
-    f       = @(w) trace( -(w*ZA + (1-w)*ZB) ); % arg (min -f) = arg (max f)
-    omega   = fminbnd(f,0,1,optimset('Display','off'));
+    if strcmp(weight,'OPTIMAL')
+%         f       = @(w) trace( pinv(w*pinv(ZA) + (1-w)*pinv(ZB)) ); % arg (min -f) = arg (max f)
+        f       = @(w) trace( inv(w*ZA + (1-w)*ZB) ); % arg (min -f) = arg (max f)
+        options = optimset('MaxIter',iteration,'Display','off');
+        omega   = fminbnd(f,0,1,options);
+    else
+        omega = constant;
+    end
+    omega
     Zf      = omega*ZA + (1-omega)*ZB;
     zf      = omega*x_a + (1-omega)*x_b;
     1;
-elseif type == 2
+elseif strcmp(type,'EI')
     % EI
     [Si,Di] = eig(X_a);
     [Sj,Dj] = eig(pinv(Di^0.5)*pinv(Si)*X_b*Si*pinv(Di^0.5));
@@ -75,17 +83,23 @@ elseif type == 2
     zf  = x_a + x_b - xij;
     Zf  = X_a + X_b - Xij;
     2;
-elseif type == 3    
+elseif strcmp(type,'ICI')   
     % ICI
     ZA      = X_a;
     ZB      = X_b;
-    ff      = @(w) trace(-(ZA + ZB - ZA*pinv(w*ZB + (1-w)*ZA)*ZB)); % min -f = max f
-    omega   = fminbnd(ff,0,1,optimset('Display','off'));
-    Xij     = ZA*pinv(omega*ZB + (1-omega)*ZA)*ZB;
+    if strcmp(weight,'OPTIMAL')
+% %         ff      = @(w) trace(pinv(ZA + ZB - ZA*pinv(w*ZB + (1-w)*ZA)*ZB)); % min -f = max f
+        ff      = @(w) trace(-(ZA + ZB - ZA*inv(w*ZB + (1-w)*ZA)*ZB)); % min -f = max f
+        options = optimset('MaxIter',iteration,'Display','off');
+        omega   = fminbnd(ff,0,1,options);
+    else
+        omega = constant;
+    end
+    Xij     = ZA*inv(omega*ZB + (1-omega)*ZA)*ZB;
     Zf      = X_a + X_b - Xij;
 
-    K = ( X_a - (omega)*Xij )*pinv(Zf);
-    L = ( X_b - (1 - omega)*Xij )*pinv(Zf);
+    K = ( X_a - (omega)*Xij )*inv(Zf);
+    L = ( X_b - (1 - omega)*Xij )*inv(Zf);
     zf = K*x_a + L*x_b;
     3;
 end

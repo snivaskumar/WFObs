@@ -1,4 +1,4 @@
-function [zf, Zf, xf] = fuse2(z1,z2,Z1,Z2,x1,x2,type);
+function [zf, Zf, xf] = fuse2(z1,z2,Z1,Z2,x1,x2,type, weight,constant );
 % [zf, Zf, xf] = fuze2(z1,z2,Z1,Z2,x1,x2,type);
 % type    1 for CI, 2 for EI, 3 for ICI
 
@@ -49,9 +49,13 @@ elseif strcmp(type,'CI2')
     % CI
     ZA      = X_a;
     ZB      = X_b;
-    f       = @(w) trace( pinv(w*pinv(ZA) + (1-w)*pinv(ZA)) ); % arg (min -f) = arg (max f)
-    omega   = fminbnd(f,0,1,optimset('Display','off'));
-    Zf      = pinv(omega*pinv(ZA) + (1-omega)*pinv(ZA));
+    if strcmp(weight,'OPTIMAL')
+        f       = @(w) trace( pinv(w*pinv(ZA) + (1-w)*pinv(ZB)) ); % arg (min -f) = arg (max f)
+        omega   = fminbnd(f,0,1,optimset('Display','off'));
+    else
+        omega = constant;
+    end
+    Zf      = pinv(omega*pinv(ZA) + (1-omega)*pinv(ZB));
     zf      = Zf*(omega*pinv(ZA)*x_a + (1-omega)*pinv(ZB)*x_b);
     1;
 elseif strcmp(type,'EI')
@@ -79,8 +83,12 @@ elseif strcmp(type,'ICI')
     % ICI
     ZA      = X_a;
     ZB      = X_b;
-    ff      = @(w) trace( (pinv(ZA) + pinv(ZB) - pinv(w*ZA + (1-w)*ZB))); % min -f = max f
-    omega   = fminbnd(ff,0,1,optimset('Display','off'));
+    if strcmp(weight,'OPTIMAL')
+        ff      = @(w) trace( (pinv(ZA) + pinv(ZB) - pinv(w*ZA + (1-w)*ZB))); % min -f = max f
+        omega   = fminbnd(ff,0,1,optimset('Display','off'));
+    else
+        omega = constant;
+    end
     Xij     = omega*ZA + (1-omega)*ZB;
     Zf      = pinv(pinv(X_a) + pinv(X_b) - pinv(Xij));
 
