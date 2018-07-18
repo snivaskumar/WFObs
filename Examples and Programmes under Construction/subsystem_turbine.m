@@ -50,9 +50,9 @@ if sol_in.k == 1
     end
     % toc
 
-    opu = [strucObs.obs_array_locu.x;strucObs.obs_array_locu.y]';
-    opv = [strucObs.obs_array_locv.x;strucObs.obs_array_locv.y]';
-    
+%     opu = [strucObs.obs_array_locu.x;strucObs.obs_array_locu.y]';
+%     opv = [strucObs.obs_array_locv.x;strucObs.obs_array_locv.y]';
+%     
 %     figure, plot(state(:,2),state(:,1),'sb') 
 %     for i = 1:tur
 %         hold on, plot(turbine(i,2),turbine(i,1),'s','LineWidth',3)
@@ -68,6 +68,7 @@ if sol_in.k == 1
 %     xlabel('y-direction'),ylabel('x-direction');
 %     titl = sprintf('Decomposing the flow field into sub-systems (%dD)',sub_len);
 %     title(titl),legend('Flow fields','Turbine 1','Sub-System 1','Turbine 2','Sub-System2');    
+%     axis equal
     
     x_est = x{1};
     for i = 2:tur

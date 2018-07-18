@@ -24,9 +24,10 @@ strucObs.noise          = 0.0;
 % strucObs.noise_init     = 1;
 
 % Estimate freestream conditions
-strucObs.U_Inf.estimate  = false;  % Estimate freestream (inflow) u_Inf and v_Inf
-strucObs.U_Inf.intFactor = 0.99;  % LPF gain (1: do not change, 0: instant change)
-   
+strucObs.U_Inf.estimate     = false;  % Estimate freestream (inflow) u_Inf and v_Inf
+strucObs.U_Inf.intFactor    = 0.99;  % LPF gain (1: do not change, 0: instant change)
+scriptOptions.U_Inf         = 11; % 'actual', 5, 11
+
 % Measurement definitions
 strucObs.measPw      = false;  % Use power measurements (SCADA) from turbines in estimates
 strucObs.measFlow    = true;   % Use flow measurements (LIDAR) in estimates
@@ -38,10 +39,15 @@ switch lower(strucObs.filtertype)
     % Distributed Extended Kalman filter (ExKF)
     case {'dexkf'}
         % Covariances
-        strucObs.R_k = 1.0; % 1.0; % Measurement   covariance matrix
-        strucObs.Q_k = 1.0; % 1.0; % Process noise covariance matrix
-        strucObs.P_0 = 0.5; % 0.5; % Initial state covariance matrix
+%         strucObs.R_k = 1.0; % 1.0 % Measurement   covariance matrix
+%         strucObs.Q_k = 1.0; % 1.0 % Process noise covariance matrix
+        strucObs.P_0 = 0.5; % 0.5 % Initial state covariance matrix
         strucObs.stateEst = true;  % Estimate model states
+        
+        strucObs.R_k      = 1;  % 1e-2 % Co-V for measurement noise ensemble        
+        strucObs.Q_e.u    = 1;  % 1e-6 % 1e-2 % Co-V for process noise 'u' in m/s
+        strucObs.Q_e.v    = 1;  % 1e-8 % 1e-4 % Co-V for process noise 'v' in m/s
+        strucObs.Q_e.p    = 0;  % Co-V for process noise 'p' in m/s        
 
         % Other model settings
         scriptOptions.exportPressures = false; % Model/predict/filter pressure terms
@@ -49,6 +55,8 @@ switch lower(strucObs.filtertype)
     
         strucObs.tune.est  = false; % Estimate model parameters
         
+        strucObs.Punest                 = 20;   % 5
+        strucObs.typeOutput             = 'all';% 'all', 'selected' 
         strucObs.Subsys_length          = 2;	% Length of the subsystem around each turbine 
                                                 % Subsys_length = 1  if Subsys_length = 1D
                                                 % (D = Rotor length)
@@ -56,13 +64,14 @@ switch lower(strucObs.filtertype)
                                                 % Subsys_length = 3  if Subsys_length = 3D
                                                 % Subsys_length = 4  if Subsys_length = 4D
                                                 % Subsys_length = x  if Subsys_length = x
-        strucObs.fusion_type            = 'ci2';   % CI = 0,1; EI = 2; ICI = 3, IFAC = 4, No fusion = 5
+        strucObs.fusion_type            = 'ifac';   % CI = 0,1; EI = 2; ICI = 3, IFAC = 4, No fusion = 5
         strucObs.IFAC_type              = 1;        % 1 for z_k, 2 for z_k and x_p
         strucObs.IFACWeight             = 'constant';% Optimal or Constant
+        strucObs.IFACConstantWeight     = 2;        % W = 1 for CIN or W >= 1
         strucObs.CIWeight               = 'constant';% Optimal or Constant
         strucObs.fusion_CIiteration     = 5;            % # of iterations the optimization problem is run
-        strucObs.CIConstantWeight       = 0.2;
-        strucObs.typeCZ                 = 'c';      % C = Co-Variance, Z = Information
+        strucObs.CIConstantWeight       = 0.5;
+        strucObs.typeCZ                 = 'z';      % C = Co-Variance, Z = Information
         strucObs.linearize_freq         = Inf;      % 50 if linearize the non-linear system every 50 iterations
                                             % 100 if linearize the non-linear system every 100 iterations
                                             % N if linearize the non-linear system every N iterations
@@ -114,9 +123,14 @@ switch lower(strucObs.filtertype)
     % Extended Kalman filter (ExKF)
     case {'exkf'}
         % Covariances
-        strucObs.R_k = 1.0; % Measurement   covariance matrix
-        strucObs.Q_k = 1.0; % Process noise covariance matrix
-        strucObs.P_0 = 0.5; % Initial state covariance matrix
+%         strucObs.R_k = 1.0; % 1.0 % Measurement   covariance matrix
+%         strucObs.Q_k = 1.0; % 1.0 % Process noise covariance matrix
+        strucObs.P_0 = 0.5; % 0.5 % Initial state covariance matrix
+        
+        strucObs.R_k      = 1e-2;  % 1e-2 % Co-V for measurement noise ensemble        
+        strucObs.Q_e.u    = 1e-2;  % 1e-6 % 1e-2 % Co-V for process noise 'u' in m/s
+        strucObs.Q_e.v    = 1e-4;  % 1e-8 % 1e-4 % Co-V for process noise 'v' in m/s
+        strucObs.Q_e.p    = 0;  % Co-V for process noise 'p' in m/s        
 
         % Other model settings
         scriptOptions.exportPressures = false; % Model/predict/filter pressure terms
@@ -126,8 +140,14 @@ switch lower(strucObs.filtertype)
                                         % 100 if linearize the non-linear system every 100 iterations
                                         % N if linearize the non-linear system every N iterations
                                         % Inf if linearize the non-linear system only at the first iteration
-        strucObs.localize   = 0;        % 1 for localised
-        strucObs.l_locl     = 2*131;
+                                        
+        % Inflation and localization
+        strucObs.localize       = 0;        % 1 for localised
+        strucObs.localizeType   = 2;        % 1 for localizing 'P_{k|k-1}', 2 for 'P_{k|k}'
+        strucObs.l_locl     = 0.5*131;
+        strucObs.r_infl     = 1.025;     % Covariance inflation factor (typically 1.00-1.20, no inflation: 1)
+        strucObs.f_locl     = 'gaspari'; % Localization method: 'off', 'gaspari' (Gaspari-Cohn 1999) or 'heaviside' (Heaviside step function: 0s or 1s)
+        
         strucObs.stateEst   = true;     % Estimate model states
         strucObs.tune.est   = false;    % Estimate model parameters
                                             
@@ -180,20 +200,20 @@ switch lower(strucObs.filtertype)
         scriptOptions.exportPressures = false; % Include pressure terms in ensemble members (default: false)
         
         % Model state covariances
-        strucObs.stateEst = true;  % Estimate model states
-        strucObs.R_ePw    = 1e5;   % Measurement noise for turbine power measurements
-        strucObs.R_e      = 0.10;  % Standard dev. for measurement noise ensemble        
-        strucObs.Q_e.u    = 0.10;  % 1e-3;% 0.10 % Standard dev. for process noise 'u' in m/s
-        strucObs.Q_e.v    = 0.01;  % 1e-4;% 0.01 % Standard dev. for process noise 'v' in m/s
-        strucObs.Q_e.p    = 0.00;  % Standard dev. for process noise 'p' in m/s        
-        strucObs.W_0.u    = 0.90;  % Width (in m/s) of uniform dist. around opt. estimate for initial ensemble
-        strucObs.W_0.v    = 0.30;  % Width (in m/s) of uniform dist. around opt. estimate for initial ensemble
-        strucObs.W_0.p    = 0.00;  % Only used for case Projection = 0
+        strucObs.stateEst = true;   % Estimate model states
+        strucObs.R_ePw    = 1e5;    % Measurement noise for turbine power measurements
+        strucObs.R_e      = 1;      % Standard dev. for measurement noise ensemble        
+        strucObs.Q_e.u    = 0.1;      % 1e-3;% 0.10 % Standard dev. for process noise 'u' in m/s
+        strucObs.Q_e.v    = 0.5;      % 1e-4;% 0.01 % Standard dev. for process noise 'v' in m/s
+        strucObs.Q_e.p    = 0.00;   % Standard dev. for process noise 'p' in m/s        
+        strucObs.W_0.u    = 0.90;   % Width (in m/s) of uniform dist. around opt. estimate for initial ensemble
+        strucObs.W_0.v    = 0.30;   % Width (in m/s) of uniform dist. around opt. estimate for initial ensemble
+        strucObs.W_0.p    = 0.00;   % Only used for case Projection = 0
         
         % Inflation and localization
         strucObs.r_infl = 1.025;     % Covariance inflation factor (typically 1.00-1.20, no inflation: 1)
         strucObs.f_locl = 'gaspari'; % Localization method: 'off', 'gaspari' (Gaspari-Cohn 1999) or 'heaviside' (Heaviside step function: 0s or 1s)
-        strucObs.l_locl = 131;       % Gaspari-Cohn: typically sqrt(10/3)*L with L the cut-off length. Heaviside: cut-off length (m).
+        strucObs.l_locl = 131;       % 131 % Gaspari-Cohn: typically sqrt(10/3)*L with L the cut-off length. Heaviside: cut-off length (m).
         
         % Parameter estimation settings
         strucObs.tune.est  = false; % Estimate model parameters

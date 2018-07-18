@@ -46,7 +46,7 @@ if strcmp(type,'CIN')
     Zf      = X_a + X_b;
     zf      = x_a + x_b;
     0;
-elseif strcmp(type,'CI2')
+elseif strcmp(type,'CI2')||strcmp(type,'CI')
     % CI
     ZA      = X_a;
     ZB      = X_b;
@@ -58,7 +58,7 @@ elseif strcmp(type,'CI2')
     else
         omega = constant;
     end
-    omega
+    omega;
     Zf      = omega*ZA + (1-omega)*ZB;
     zf      = omega*x_a + (1-omega)*x_b;
     1;

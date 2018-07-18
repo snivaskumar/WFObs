@@ -1,4 +1,4 @@
-function [xkk Pkk omega] = distributed_linear( strucObs,x,d,p,hr,n, F,D,E,G,H,Q,R, yy, xkk1,xk1k1,Sk1k1, x_est,x_unest, P_unest, type,typeCZ, weight,constant );
+function [xkk Pkk omega] = distributed_linear( strucObs,x,d,p,hr,n, F,D,E,G,H,Q,R, yy,yyy, xkk1,xk1k1,Sk1k1, x_est,x_unest, P_unest, type,typeCZ, weight,constant );
 % [xkk Pkk] = distributed_linear( x,d,F,D,G,H,Q,R, y, xkk1,xk1k1,Sk1k1, type );
 % tic
 % xkk1    = xkk1(p);
@@ -59,9 +59,12 @@ for i = 1:hr
 end
 % toc
 
+typeOutput = upper( strucObs.typeOutput );
 % S(k/k-1)_l
 Slkk1 = cell(hr,1);
 xlkk1 = cell(hr,1);
+kk = cell(hr,1);
+jj = cell(hr,1);
 % tic
 parfor i = 1:hr
     xlkk1{i}    = xkk1(x{i});
@@ -88,7 +91,27 @@ parfor i = 1:hr
              + S3 + S4 + S4'...
              + S5 + S6 + S6' + Q{i};
             
-    y{i}        = yy( : );
+    if strcmp(typeOutput,'ALL')  
+        y{i}        = yy( : );
+    else
+        obs_array = strucObs.obs_array;
+        len = length( obs_array );
+        y{i} = [];
+        kk{i} = [];
+        jj{i} = [];
+        for j = 1:len
+            k = obs_array(j);
+            if sum( x{i}==k )
+                y{i} = [y{i}; yyy(k)];
+                kk{i} = [kk{i};k];
+                jj{i} = [jj{i};j];
+            end
+        end
+        H{i} = H{i}(jj{i},:);
+        [r,c] = size( H{i} );
+        R{i} = strucObs.R_k*eye(r,r);
+    end
+    
 end
 % toc
 
@@ -143,7 +166,7 @@ Pf = Zlkk;
 xf = x;
 filter          = strucObs.filtertype; 
 iteration       = strucObs.fusion_CIiteration; 
-if strcmp(type,'CIN')||strcmp(type,'CI2')||strcmp(type,'EI')||strcmp(type,'ICI')
+if strcmp(type,'CIN')||strcmp(type,'CI2')||strcmp(type,'CI')||strcmp(type,'EI')||strcmp(type,'ICI')
     zfkk = cell(ceil(hr/2),1);
     Pfkk = cell(ceil(hr/2),1);
     xfkk = cell(ceil(hr/2),1);
@@ -162,7 +185,7 @@ if strcmp(type,'CIN')||strcmp(type,'CI2')||strcmp(type,'EI')||strcmp(type,'ICI')
             parfor i = 1:(nnn)
                 ii = i + (i - 1);
                 if strcmp(typeCZ,'C')
-                    [zfkk{i}, Pfkk{i}, xfkk{i}]  = fuse2(zf{ii},zf{ii+1},Pf{ii},Pf{ii+1},xf{ii},xf{ii+1},type, weight,constant,iteration,filter);
+                    [zfkk{i}, Pfkk{i}, xfkk{i}, omega{i}]  = fuse2(zf{ii},zf{ii+1},Pf{ii},Pf{ii+1},xf{ii},xf{ii+1},type, weight,constant,iteration,filter);
                 elseif strcmp(typeCZ,'Z')
                     [zfkk{i}, Pfkk{i}, xfkk{i}, omega{i}]  = fuze2(zf{ii},zf{ii+1},Pf{ii},Pf{ii+1},xf{ii},xf{ii+1},type, weight,constant,iteration);
                 end
@@ -170,7 +193,7 @@ if strcmp(type,'CIN')||strcmp(type,'CI2')||strcmp(type,'EI')||strcmp(type,'ICI')
             if flag == 1
                 loc = (nnn);
                 if strcmp(typeCZ,'C')
-                    [zfkk{loc}, Pfkk{loc}, xfkk{loc}]  = ...
+                    [zfkk{loc}, Pfkk{loc}, xfkk{loc}, omega{loc}]  = ...
                         fuse2(zfkk{loc},zf{2*nnn+1},Pfkk{loc},Pf{2*nnn+1},xfkk{loc},xf{2*nnn+1},type, weight,constant,iteration,filter);
                 elseif strcmp(typeCZ,'Z')
                     [zfkk{loc}, Pfkk{loc}, xfkk{loc}, omega{loc}]  = ...
@@ -212,35 +235,38 @@ elseif strcmp(type,'IFAC')
     4;
     typeIFAC    = strucObs.IFAC_type;
     typeWeight  = upper(strucObs.IFACWeight);
-    [xtmp,Ptmp] = fuze(zf,Pf,xf,hr,n,Zlkk1,xkk1,x_est,typeCZ,typeIFAC,typeWeight);
-elseif strcmp(type,'CI')
-    for i = 1:hr
-        tmp             = zeros(n,n);
-        tmp(x{i},x{i})  = Pf{i};
-        Pf{i}           = tmp(x_est,x_est);
-        tmp             = zeros(n,1);
-        tmp(x{i})       = zf{i};
-        zf{i}           = tmp(x_est);
-    end  
-    A = ones(1,hr);B = 1;
-    omega0 = (1/hr)*ones(1,hr);
-    options = optimset('tolx',1.0e-8,'MaxFunEvals',25,'Display','off');
-    omega = fmincon(@f,omega0',A,B,[],[],0*A,A,[],options,Pf,xf,hr);
-    %omega = omega0;
-    l_est = length(x_est);
-    Ptmp = zeros(l_est,l_est);
-    xtmp = zeros(l_est,1);
-    for i = 1:hr
-        Ptmp = Ptmp + omega(i)*Pf{i};
-        xtmp = xtmp + omega(i)*zf{i};
-    end
-    Ptmp = pinv(Ptmp);
-    xtmp = Ptmp*xtmp;
+    weight      = strucObs.IFACConstantWeight;
+    [xtmp,Ptmp] = fuze(zf,Pf,xf,hr,n,Zlkk1,xkk1,x_est,typeCZ,typeIFAC,typeWeight,weight);
+% elseif strcmp(type,'CI')
+%     for i = 1:hr
+%         tmp             = zeros(n,n);
+%         tmp(x{i},x{i})  = Pf{i};
+%         Pf{i}           = tmp(x_est,x_est);
+%         tmp             = zeros(n,1);
+%         tmp(x{i})       = zf{i};
+%         zf{i}           = tmp(x_est);
+%     end  
+%     A = ones(1,hr);B = 1;
+%     omega0 = (1/hr)*ones(1,hr);
+%     options = optimset('tolx',1.0e-8,'MaxFunEvals',25,'Display','off');
+%     omega = fmincon(@f,omega0',A,B,[],[],0*A,A,[],options,Pf,xf,hr);
+%     %omega = omega0;
+%     l_est = length(x_est);
+%     Ptmp = zeros(l_est,l_est);
+%     xtmp = zeros(l_est,1);
+%     for i = 1:hr
+%         Ptmp = Ptmp + omega(i)*Pf{i};
+%         xtmp = xtmp + omega(i)*zf{i};
+%     end
+%     Ptmp = pinv(Ptmp);
+%     xtmp = Ptmp*xtmp;
 end
 
+Punest = strucObs.Punest;
 if strcmp(type,'NO FUSION')||strcmp(type,'NO')     %No Fusion
-    Pkk             = 5*eye(n,n);
-    xkk             = zeros(n,1);
+    Pkk             = Punest*eye(n,n);
+    xkk             = xkk1;
+%     xkk             = zeros(n,1);
     for  i = 1:hr
         if strcmp(typeCZ,'C')
             xkk(xf{i}) = zf{i};
@@ -251,9 +277,9 @@ if strcmp(type,'NO FUSION')||strcmp(type,'NO')     %No Fusion
             xkk(xf{i}) = PPtmp*zf{i};
         end
     end
-    xkk(x_unest)    = xkk1(x_unest);
+%     xkk(x_unest)    = xkk1(x_unest);
 else        %Fusion
-    Pkk             = 5*eye(n,n);
+    Pkk             = Punest*eye(n,n);
     Pkk(x_est,x_est)= Ptmp;
 
     xkk             = zeros(n,1);
@@ -261,7 +287,16 @@ else        %Fusion
     xkk(x_unest)    = xkk1(x_unest);
 end
 
-% Pkk = Pkk(I,I);
-% xkk = xkk(I);
+% l_est = length( x_est );
+% l_unest = length( x_unest );
+% 
+% Pest = Ptmp;
+% Punest = strucObs.Punest*eye(l_unest,l_unest);
+% 
+% xest = xtmp;
+% xunest = xkk1(x_unest);
+% 
+% [xkk, Pkk, ~, ~] = fuse2(xest,xunest,Pest,Punest,x_est,x_unest,'CIN',weight,constant,iteration,filter);
+
 % toc
 

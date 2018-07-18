@@ -8,7 +8,8 @@ if sol_in.k == 1
 %     weight = 'OPTIMAL';
     constant    = strucObs.CIConstantWeight;
 else
-    constant    = strucObs.omega;
+%     constant    = strucObs.omega;
+    constant    = strucObs.CIConstantWeight;
 end
 if (rem(sol_in.k,10) == 0)
     weight = 'OPTIMAL';
@@ -108,12 +109,20 @@ if sol_in.k == 1
         strucObs.Pk    = sparse(eye(strucObs.size_state))*strucObs.P_0;
         strucObs.Htt   = sparse(eye(strucObs.size_state));
         strucObs.Htt   = strucObs.Htt(strucObs.obs_array,:);
-        strucObs.Q_k   = strucObs.Q_k*eye(strucObs.size_state);
+%         strucObs.Q_k   = strucObs.Q_k*eye(strucObs.size_state);
+        Qu             = strucObs.Q_e.u*ones(1,Wp.Nu);
+        Qv             = strucObs.Q_e.v*ones(1,Wp.Nv);
+        Qp             = strucObs.Q_e.p*ones(1,Wp.Np);
+        strucObs.Q_k   = [Qu, Qv, Qp].*eye(strucObs.size_state);
     else
         strucObs.Pk    = sparse(eye(strucObs.size_output))*strucObs.P_0;
         strucObs.Htt   = sparse(eye(strucObs.size_output));
         strucObs.Htt   = strucObs.Htt(strucObs.obs_array,:);
-        strucObs.Q_k   = strucObs.Q_k*eye(strucObs.size_output);
+%         strucObs.Q_k   = strucObs.Q_k*eye(strucObs.size_output);
+        Qu             = strucObs.Q_e.u*ones(1,Wp.Nu);
+        Qv             = strucObs.Q_e.v*ones(1,Wp.Nv);
+%         Qp             = strucObs.Q_e.p*ones(1,Wp.Np);
+        strucObs.Q_k   = [Qu, Qv].*eye(strucObs.size_output);
     end;
 end;
 Ck          = strucObs.Htt;
@@ -218,7 +227,7 @@ l       = strucObs.subsystem.l;         n       = strucObs.subsystem.n;
 x_est   = strucObs.subsystem.x_est;     x_unest = strucObs.subsystem.x_unest;
 P_unest = strucObs.subsystem.P_unest;
 % tic
-[xkk Pkk strucObs.omega] = distributed_linear( strucObs,x,d,p,l,n, F,D,E,G,H,Q,R, y, xkk1,xk1k1,Sk1k1, x_est,x_unest, P_unest, type,typeCZ, weight,constant );
+[xkk Pkk strucObs.omega] = distributed_linear( strucObs,x,d,p,l,n, F,D,E,G,H,Q,R, y,measuredData.sol, xkk1,xk1k1,Sk1k1, x_est,x_unest, P_unest, type,typeCZ, weight,constant );
 % toc
 
 sol_out.x   = xkk;

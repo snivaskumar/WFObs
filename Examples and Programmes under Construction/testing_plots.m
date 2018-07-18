@@ -1,5 +1,5 @@
 %% U_Inf = 11m/s and it is not estimated (EnKF, DExKF_IFAC:1D,2D)
-% With E
+% With Eones(1,5)
 clear all
 close all
 clc

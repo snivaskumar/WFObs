@@ -1,4 +1,4 @@
-function [hFigs, scriptOptions] = plotWFObs( Wp,sol_array,sys,scriptOptions,strucObs )
+function [hFigs, scriptOptions] = plotWFObs( Wp,sol_array,sys,scriptOptions,strucObs, k )
 % clear all
 % close all
 % clc
@@ -16,7 +16,11 @@ scriptOptions.savePath = '/Users/Nivas_Kumar/Documents/NivasStudyMaterials/TUDel
 % scriptOptions.savePath = 'C:\Users\Nivas Temp\Documents\Nivas\MSc Thesis\WFObs\results\tmp';
 
 % Import variables
-sol          = sol_array(end); 
+if nargin == 5
+    sol          = sol_array(end); 
+else
+    sol          = sol_array(k); 
+end
 measuredData = sol.measuredData;
 
 % Produce figures
