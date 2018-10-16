@@ -1,11 +1,6 @@
-function [xkk Pkk omega] = distributed_linear( strucObs,x,d,p,hr,n, F,D,E,G,H,Q,R, yy,yyy, xkk1,xk1k1,Sk1k1, x_est,x_unest, P_unest, type,typeCZ, weight,constant );
+function [xkk Pkk omega Ptmp Slkk K] = distributed_linear( strucObs,x,d,p,hr,n, F,D,E,G,H,Q,R, yy,yyy, xkk1,xk1k1,Sk1k1, x_est,x_unest, P_unest, type,typeCZ, weight,constant );
 % [xkk Pkk] = distributed_linear( x,d,F,D,G,H,Q,R, y, xkk1,xk1k1,Sk1k1, type );
-% tic
-% xkk1    = xkk1(p);
-% xk1k1   = xk1k1(p);
-% Sk1k1   = Sk1k1(p,p);
-% [Y,I] = sort(p);
-% toc
+
 omega = [];
 % Prediction
 Slff = cell(hr,1);
@@ -66,7 +61,7 @@ xlkk1 = cell(hr,1);
 kk = cell(hr,1);
 jj = cell(hr,1);
 % tic
-parfor i = 1:hr
+for i = 1:hr
     xlkk1{i}    = xkk1(x{i});
 %     Slkk1{i}    = F{i}*Slff{i}*F{i}'...
 %                 + F{i}*Slfd{i}*D{i}'...
@@ -83,13 +78,18 @@ parfor i = 1:hr
 
     S1 = F{i}*Slff{i}*F{i}'; S2 = F{i}*Slfd{i}*D{i}';
     S3 = D{i}*Sldd{i}*D{i}';    
-    S4 = D{i}*Slde{i}*E{i}'; S5 = E{i}*Slee{i}*E{i}'; 
-    S6 = F{i}*Slfe{i}*E{i}';
+%     S4 = D{i}*Slde{i}*E{i}'; 
+    S5 = E{i}*Slee{i}*E{i}'; 
+%     S6 = F{i}*Slfe{i}*E{i}';
     
 %     Slkk1{i} = S1 + S2 + S2' + S3 + Q{i};    
     Slkk1{i} = S1 + S2 + S2'...
-             + S3 + S4 + S4'...
-             + S5 + S6 + S6' + Q{i};
+             + S3...
+             + S5 + Q{i};
+         
+% 	Slkk1{i} = S1 + S2 + S2'...
+%              + S3 + S4 + S4'...
+%              + S5 + S6 + S6' + Q{i};
             
     if strcmp(typeOutput,'ALL')  
         y{i}        = yy( : );
@@ -122,7 +122,7 @@ if strcmp(typeCZ,'Z')
     zlkk1 = cell(hr,1);     INFF = cell(hr,1);
     Zlkk = cell(hr,1);
     zlkk = cell(hr,1);
-    parfor i = 1:hr
+    for i = 1:hr
         Zlkk1{i} = inv(Slkk1{i});
         zlkk1{i} = Zlkk1{i}*xlkk1{i};
         
@@ -166,7 +166,7 @@ Pf = Zlkk;
 xf = x;
 filter          = strucObs.filtertype; 
 iteration       = strucObs.fusion_CIiteration; 
-if strcmp(type,'CIN')||strcmp(type,'CI2')||strcmp(type,'CI')||strcmp(type,'EI')||strcmp(type,'ICI')
+if strcmp(type,'CIN')||strcmp(type,'CI2')||strcmp(type,'EI')||strcmp(type,'ICI')
     zfkk = cell(ceil(hr/2),1);
     Pfkk = cell(ceil(hr/2),1);
     xfkk = cell(ceil(hr/2),1);
@@ -182,7 +182,7 @@ if strcmp(type,'CIN')||strcmp(type,'CI2')||strcmp(type,'CI')||strcmp(type,'EI')|
         nnn = nnn/2;
         while nnn >= 1
             ii = 0;
-            parfor i = 1:(nnn)
+            for i = 1:(nnn)
                 ii = i + (i - 1);
                 if strcmp(typeCZ,'C')
                     [zfkk{i}, Pfkk{i}, xfkk{i}, omega{i}]  = fuse2(zf{ii},zf{ii+1},Pf{ii},Pf{ii+1},xf{ii},xf{ii+1},type, weight,constant,iteration,filter);
@@ -237,29 +237,29 @@ elseif strcmp(type,'IFAC')
     typeWeight  = upper(strucObs.IFACWeight);
     weight      = strucObs.IFACConstantWeight;
     [xtmp,Ptmp] = fuze(zf,Pf,xf,hr,n,Zlkk1,xkk1,x_est,typeCZ,typeIFAC,typeWeight,weight);
-% elseif strcmp(type,'CI')
-%     for i = 1:hr
-%         tmp             = zeros(n,n);
-%         tmp(x{i},x{i})  = Pf{i};
-%         Pf{i}           = tmp(x_est,x_est);
-%         tmp             = zeros(n,1);
-%         tmp(x{i})       = zf{i};
-%         zf{i}           = tmp(x_est);
-%     end  
-%     A = ones(1,hr);B = 1;
-%     omega0 = (1/hr)*ones(1,hr);
-%     options = optimset('tolx',1.0e-8,'MaxFunEvals',25,'Display','off');
-%     omega = fmincon(@f,omega0',A,B,[],[],0*A,A,[],options,Pf,xf,hr);
-%     %omega = omega0;
-%     l_est = length(x_est);
-%     Ptmp = zeros(l_est,l_est);
-%     xtmp = zeros(l_est,1);
-%     for i = 1:hr
-%         Ptmp = Ptmp + omega(i)*Pf{i};
-%         xtmp = xtmp + omega(i)*zf{i};
-%     end
-%     Ptmp = pinv(Ptmp);
-%     xtmp = Ptmp*xtmp;
+elseif strcmp(type,'CI')
+    for i = 1:hr
+        tmp             = zeros(n,n);
+        tmp(x{i},x{i})  = Pf{i};
+        Pf{i}           = tmp(x_est,x_est);
+        tmp             = zeros(n,1);
+        tmp(x{i})       = zf{i};
+        zf{i}           = tmp(x_est);
+    end  
+    A = ones(1,hr);B = 1;
+    omega0 = (1/hr)*ones(1,hr);
+    options = optimset('tolx',1.0e-8,'MaxFunEvals',25,'Display','off');
+    omega = fmincon(@f,omega0',A,B,[],[],0*A,A,[],options,Pf,xf,hr);
+    %omega = omega0;
+    l_est = length(x_est);
+    Ptmp = zeros(l_est,l_est);
+    xtmp = zeros(l_est,1);
+    for i = 1:hr
+        Ptmp = Ptmp + omega(i)*Pf{i};
+        xtmp = xtmp + omega(i)*zf{i};
+    end
+    Ptmp = pinv(Ptmp);
+    xtmp = Ptmp*xtmp;
 end
 
 Punest = strucObs.Punest;

@@ -42,7 +42,11 @@ for i = 1:hr
     end
     if strcmp(typeWeight,'CONSTANT')
 %         w = l;
-        w = 1/weight;
+%         w = 1/weight;
+        w = weight;
+        if i ~= 1
+            w = (1-w)/(hr-1);
+        end
         Ze(k+1:nn,k+1:nn)   = pinv( (1/w).*C{i} );
     elseif strcmp(typeWeight,'OPTIMAL')
         Ze(k+1:nn,k+1:nn)   = C{i};

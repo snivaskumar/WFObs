@@ -1,4 +1,4 @@
-function [ Wp,sol,strucObs ] = WFObs_o(strucObs,Wp,sys,sol,options)
+function [ Wp,sol,strucObs ] = WFObs_o(strucObs,Wp,sys,sol,options,sol_array2)
 % WFOBS_O  Header function to call the correct estimation function
 %
 %   SUMMARY
@@ -53,10 +53,10 @@ function [ Wp,sol,strucObs ] = WFObs_o(strucObs,Wp,sys,sol,options)
 switch lower(strucObs.filtertype)
     case 'dexkf'
         % Distributed Extended Kalman filtering
-        [Wp,sol,strucObs] = WFObs_o_dexkf(strucObs,Wp,sys,sol,options);
+        [Wp,sol,strucObs] = WFObs_o_dexkf(strucObs,Wp,sys,sol,options,sol_array2);
     case 'exkf'
         % Extended Kalman filtering
-        [Wp,sol,strucObs] = WFObs_o_exkf(strucObs,Wp,sys,sol,options);
+        [Wp,sol,strucObs] = WFObs_o_exkf(strucObs,Wp,sys,sol,options,sol_array2);
     case 'smo'
         % Sliding mode observer
         [Wp,sol,strucObs] = WFObs_o_smo(strucObs,Wp,sys,sol,options);        

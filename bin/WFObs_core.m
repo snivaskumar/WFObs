@@ -69,35 +69,91 @@ while sol.k < Wp.sim.NN
     % Determine freestream inflow properties from SCADA data
     [ Wp,sol,sys,strucObs ] = WFObs_s_freestream(Wp,sol,sys,strucObs);
     
+    if sol.k == 1
+        sol_array2 = [];
+    end
     % Calculate optimal solution according to filter of choice
-    [Wp,sol,strucObs] = WFObs_o(strucObs,Wp,sys,sol,scriptOptions);
+    [Wp,sol,strucObs] = WFObs_o(strucObs,Wp,sys,sol,scriptOptions,sol_array2);
     
     % Display progress in the command window
     sol = WFObs_s_reporting(timerCPU,Wp,sol,strucObs,scriptOptions);
          
     % Save reduced-size solution to an array
-    sol.measuredData = rmfield(sol.measuredData,{'u','v','sol'});
+%     sol.measuredData = rmfield(sol.measuredData,{'u','v','sol'});
     sol.site         = Wp.site; % Save site info too
+        
     if nnz(strcmp(fieldnames(sol),'uk')) >= 1
-        sol_array(sol.k) = rmfield(sol,{'uu','vv','pp','uk','vk'});
+%         sol_array(sol.k) = rmfield(sol,{'uu','vv','pp','uk','vk'});
+        if strcmp(strucObs.filtertype,'dexkf')
+            sol_array(sol.k) = rmfield(sol,{'uu','vv','pp','uk','vk','Pk','K','Slkk'});
+        elseif strcmp(strucObs.filtertype,'exkf')
+            sol_array(sol.k) = rmfield(sol,{'uu','vv','pp','uk','vk','Pk','K'});
+        else
+            sol_array(sol.k) = rmfield(sol,{'uu','vv','pp','uk','vk'});
+        end
+        
+        tmp(sol.k)= rmfield(sol,{'uu','vv','pp','uk','vk'});
     else
-        sol_array(sol.k) = rmfield(sol,{'uu','vv','pp'});
+%         sol_array(sol.k) = rmfield(sol,{'uu','vv','pp'});
+        if strcmp(strucObs.filtertype,'dexkf')
+            sol_array(sol.k) = rmfield(sol,{'uu','vv','pp','Pk','K','Slkk'});
+        elseif strcmp(strucObs.filtertype,'exkf')
+            sol_array(sol.k) = rmfield(sol,{'uu','vv','pp','Pk','K'});
+        else
+            sol_array(sol.k) = rmfield(sol,{'uu','vv','pp'});
+        end
+        
+        tmp(sol.k)= rmfield(sol,{'uu','vv','pp'});
     end
+    
+    if sol.k == 1
+        clear sol_array2
+    end
+    
+    if strcmp(strucObs.filtertype,'enkf')
+        sol_array2(sol.k)= rmfield( tmp(sol.k),{'u','v','p',...
+                    'turbine','score','cline','site'} );
+    else
+        sol_array2(sol.k)= rmfield( tmp(sol.k),{'u','v','p',...
+                    'ul','vl','pl','du','dv','dp','turbine','score','cline','site'} );
+    end
+    
+	if strcmp(strucObs.filtertype,'dexkf')
+        tmpp(sol.k) = rmfield(sol_array2(sol.k),{'K','Slkk'});
+    elseif strcmp(strucObs.filtertype,'exkf')
+        tmpp(sol.k) = rmfield(sol_array2(sol.k),{'K'});
+    else
+        tmpp(sol.k) = rmfield(sol_array2(sol.k),{});
+    end
+                
+    if strcmp(strucObs.filtertype,'enkf')
+        sol.measuredData = rmfield(sol.measuredData,{'u','v','sol'});
+    else
+        sol              = rmfield(sol,{'Pk'});
+        sol.measuredData = rmfield(sol.measuredData,{'u','v','sol'});
+    end
+    
+%     sol_array2(sol.k)               = sol_array(sol.k);
+%     sol_array2(sol.k).Pk            = tmp2;
+%     sol_array2(sol.k).measuredData  = tmp1;
     
     % Display animations on screen
     [hFigs,scriptOptions] = WFObs_s_animations(Wp,sol_array,sys,LESData,scriptOptions,strucObs,hFigs);
 end
 
+clear sol_array2
+sol_array2 = tmpp;
 %% Post-processing
 % save workspace variables, if necessary
 if scriptOptions.saveWorkspace
     save([scriptOptions.savePath '/workspace.mat'],'configName',...
-        'Wp','sys','sol_array','scriptOptions','strucObs');
+        'Wp','sys','sol_array','sol_array2','scriptOptions','strucObs');
 end
 
 % Put all relevant outputs in one structure
 if nargout >= 1
     outputData.sol_array     = sol_array;
+    outputData.sol_array2    = sol_array2;
     outputData.Wp            = Wp;
     outputData.strucObs      = strucObs;
     outputData.scriptOptions = scriptOptions;

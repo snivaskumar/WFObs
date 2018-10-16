@@ -1,4 +1,4 @@
-function [Wp,sol_out,strucObs] = WFObs_o_dexkf(strucObs,Wp,sys_in,sol_in,options)
+function [Wp,sol_out,strucObs] = WFObs_o_dexkf(strucObs,Wp,sys_in,sol_in,options,sol_array2)
 
 type        = upper(strucObs.fusion_type);
 typeCZ      = upper(strucObs.typeCZ);
@@ -156,19 +156,6 @@ if (sol_in.k == 1) || (rem(sol_in.k,NL) == 0)
 %     strucObs.Bk     = Bk;
 %     strucObs.Ck     = Ck;
 %     strucObs.state  = state;
-
-% % % %     f = 1e-4;
-% % % %     figure, spy(abs(Fk)>=f)
-% % % %     if sol_in.k ~= 1
-% % % %         trace(abs(Fk));
-% % % %         trace(abs(Fk - strucObs.Fk));
-% % % %         (trace(abs(Fk - strucObs.Fk))/trace(abs(Fk)))*100
-% % % %         sum(sum(abs(Fk)));
-% % % %         sum(sum(abs(Fk - strucObs.Fk)));
-% % % %         (sum(sum(abs(Fk - strucObs.Fk)))/sum(sum(abs(Fk))))*100
-% % % %         figure, spy(abs(Fk - strucObs.Fk)>f)
-% % % %         (nnz(abs(Fk - strucObs.Fk)>f)/nnz(abs(Fk)>f))*100
-% % % %     end
     
     strucObs.Fk     = Fk;
     strucObs.Bk     = Bk;
@@ -205,8 +192,6 @@ RR      = strucObs.R_k*eye(lop,lop);
 % tic
 RD              = Wp.turbine.Drotor;
 Subsys_length   = strucObs.Subsys_length;
-% type            = upper(strucObs.fusion_type);
-% typeCZ          = strucObs.typeCZ;
 % tic
 if (sol_in.k == 1) || (rem(sol_in.k,NL) == 0)
     [x,d,p, F,D,E,G,H,Q,R,l,n,x_est,x_unest, P_unest] = subsystem_turbine(strucObs,sol_in, p,Fk,Bk,Ck,QQ,RR, tur,state,strucObs.turbine, Subsys_length,RD, Sk1k1);
@@ -226,12 +211,44 @@ Q       = strucObs.subsystem.Q;         R       = strucObs.subsystem.R;
 l       = strucObs.subsystem.l;         n       = strucObs.subsystem.n;
 x_est   = strucObs.subsystem.x_est;     x_unest = strucObs.subsystem.x_unest;
 P_unest = strucObs.subsystem.P_unest;
-% tic
-[xkk Pkk strucObs.omega] = distributed_linear( strucObs,x,d,p,l,n, F,D,E,G,H,Q,R, y,measuredData.sol, xkk1,xk1k1,Sk1k1, x_est,x_unest, P_unest, type,typeCZ, weight,constant );
-% toc
+
+if (sol_in.k>2)
+    sol_array2(sol_in.k-1).sPk;
+    sol_array2(sol_in.k-2).sPk;
+end
+
+if ( strcmp(upper(strucObs.KF),'DYNAMIC') )...
+        ||( sol_in.k<=30 )...
+        ||(( sol_array2(sol_in.k-1).sPk - sol_array2(sol_in.k-2).sPk )>=1e-4 )
+    [xkk Pkk strucObs.omega Pf Slkk K] = distributed_linear( strucObs,x,d,p,l,n, F,D,E,G,H,Q,R, y,measuredData.sol, xkk1,xk1k1,Sk1k1, x_est,x_unest, P_unest, type,typeCZ, weight,constant );
+    sol_out.K = K;
+    sol_out.Slkk = Slkk;
+else
+    K       = sol_array2(sol_in.k-1).K;
+    Slkk    = sol_array2(sol_in.k-1).Slkk;
+    [xkk Pkk Pf Slkk K] = distributed_linear2( strucObs,x,d,p,l,n, F,D,E,G,H,Q,R, y,measuredData.sol, xkk1,Slkk, x_est,x_unest, P_unest, type,typeCZ, weight,constant,K );
+    sol_out.K = K;
+    sol_out.Slkk = Slkk;
+end
 
 sol_out.x   = xkk;
 strucObs.Pk = Pkk; 
+
+% sol_out.Pk  = strucObs.Pk;
+
+stmp1 = max(abs(eig(Pf)));
+sol_out.sPkk1 = stmp1;
+% plot(sol_out.k,stmp1,'o'),hold on;
+tmp1 = diag(Pf);
+sol_out.Pkk1 = tmp1;
+
+Pk = strucObs.Pk;
+stmp2 = max(abs(eig(Pk)));
+sol_out.sPk = stmp2;
+% plot(sol_out.k,stmp2,'*'),hold on;
+tmp2 = diag(Pk);
+sol_out.Pk = tmp2;
+
 % Export new solution from estimation
 [sol_out,~]  = MapSolution(Wp,sol_out,Inf,options); % Map solution to flowfields
 [~,sol_out]  = Actuator(Wp,sol_out,options);        % Recalculate power after analysis update

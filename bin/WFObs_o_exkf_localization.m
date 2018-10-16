@@ -82,7 +82,7 @@ else
     end
      
     %%%%% ---- %%%%%%%%%%%%%%%%%%%%    
-    if strucObs.localizeType == 2
+    if (strucObs.localizeType == 2)||(strucObs.localizeType == 3)||(strucObs.localizeType == 4)
         % Covariance localization function for state error covariance matrix
         rho_locl.autoState = sparse(strucObs.size_output,strucObs.size_output);
         for iii = 1:strucObs.size_output % Loop over all default states
