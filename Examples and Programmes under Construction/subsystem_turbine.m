@@ -53,22 +53,29 @@ if sol_in.k == 1
 %     opu = [strucObs.obs_array_locu.x;strucObs.obs_array_locu.y]';
 %     opv = [strucObs.obs_array_locv.x;strucObs.obs_array_locv.y]';
 %     
-%     figure, plot(state(:,2),state(:,1),'sb') 
+% %     figure, plot(state(:,2),state(:,1),'sb') 
 %     for i = 1:tur
-%         hold on, plot(turbine(i,2),turbine(i,1),'s','LineWidth',3)
+% %         hold on, plot(turbine(i,2),turbine(i,1),'s','LineWidth',3)
 %         hold on, plot(x_pos{i}(:,2),x_pos{i}(:,1),'*')
 %     end
 %     for i = 1:length(opu)
-%         hold on, plot(opu(i,2),opu(i,1),'*k','LineWidth',2)
+%         hold on, plot(opu(i,2),opu(i,1),'*k','LineWidth',1)
 %     end
 %     for i = 1:length(opv)
-%         hold on, plot(opv(i,2),opv(i,1),'*r','LineWidth',2)
+%         hold on, plot(opv(i,2),opv(i,1),'*k','LineWidth',1)
 %     end
 %     hold off
 %     xlabel('y-direction'),ylabel('x-direction');
 %     titl = sprintf('Decomposing the flow field into sub-systems (%dD)',sub_len);
-%     title(titl),legend('Flow fields','Turbine 1','Sub-System 1','Turbine 2','Sub-System2');    
-%     axis equal
+% %     title(titl)
+%     legend('-dynamicLegend', ...
+%         'Primary Mesh', 'Secondary Mesh' ,...
+%         'Turbine 1','Turbine 2',...
+%         'Sub-System 1','Sub-System 2',...
+%         'Measurements');    
+% %     title(titl), legend('Flow fields','Turbine 1','Sub-System 1',...
+% %         'Turbine 2','Sub-System 2', 'Measurements', 'Measurements');    
+% %     axis equal
     
     x_est = x{1};
     for i = 2:tur

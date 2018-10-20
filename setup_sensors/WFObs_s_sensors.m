@@ -12,11 +12,11 @@
 clear all; close all; clc;
 addpath WFSim\bin\core
 
-Wp.name = '2turb_adm_noturb';
-
+Wp.name = '2turb_alm_turb'; % 2turb_alm_turb %2turb_adm_noturb
+U_Inf   = 'actual'; % 'actual', 5, 11  
 
 %% Internal code
-[ Wp ] = meshing( Wp.name, 0, 0 )
+[ Wp ] = meshing( Wp.name, 0, 0, U_Inf )
 
 % Meshing and boundary conditions for u
 X{1} = Wp.mesh.ldxx2;  Y{1} = Wp.mesh.ldyy;

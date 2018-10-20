@@ -13,7 +13,6 @@ scriptOptions.plotError = 0;
 scriptOptions.plotCenterline = 0;
 scriptOptions.powerForecast = 0;
 scriptOptions.savePath = '/Users/Nivas_Kumar/Documents/NivasStudyMaterials/TUDelft/EnKF+WFSim/WFObs_Queue';
-% scriptOptions.savePath = 'C:\Users\Nivas Temp\Documents\Nivas\MSc Thesis\WFObs\results\tmp';
 
 % Import variables
 if nargin == 5
@@ -87,6 +86,14 @@ if (scriptOptions.Animate > 0) && (~rem(sol.k,scriptOptions.Animate))
             V = max(data{j}.z(:));
             if V > 11; cmax = 13; elseif V > 7; cmax = 9.; else; cmax = 3; end
             if min(data{j}.z(:)) < 0.; cmin = -cmax; else; cmin = 0.0; end
+            if j ~= 3
+                cmax = 12;
+                cmin = 0;
+            end
+            if j == 3
+                cmax = 3;
+                cmin = 0;
+            end
             contourf(data{j}.x,data{j}.y,data{j}.z,cmin:0.1:cmax,'Linecolor','none');
             title([data{j}.title ' (t = ' num2str(sol.time) ')'])
             hold all; colorbar;
@@ -117,7 +124,7 @@ if (scriptOptions.Animate > 0) && (~rem(sol.k,scriptOptions.Animate))
         % Save figures to an external file, if necessary
         if scriptOptions.savePlots
             drawnow;
-            saveas(hFigs{1},[scriptOptions.savePath '/' strucObs.filtertype '_cplot' num2str(sol.k) '.png']);
+            saveas(hFigs{1},[scriptOptions.savePath '/' strucObs.filtertype '_cplot' num2str(sol.k) '.epsc']);
         end
     end
     

@@ -1,4 +1,4 @@
-function [Wp,sol_out,strucObs] = WFObs_o_exkf(strucObs,Wp,sys_in,sol_in,options)
+function [Wp,sol_out,strucObs] = WFObs_o_exkf(strucObs,Wp,sys_in,sol_in,options,sol_array2)
 % WFOBS_O_EXKF  Extended KF algorithm for recursive state estimation
 %
 %   SUMMARY
@@ -66,76 +66,45 @@ Pk = strucObs.Pk;
 % Pf = Fk*Pk*Fk' + strucObs.Q_k;  % Covariance matrix P for x(k) knowing y(k-1)
 
 if strucObs.localize
-%     if sol_in.k == 1
-%         if strucObs.stateEst || strucObs.measFlow
-%             stateLocArray = zeros(strucObs.size_output,2);
-%             for iii = 1:strucObs.size_output
-%                 [~,loci,~]           = WFObs_s_sensors_nr2grid(iii,Wp.mesh);
-%                 stateLocArray(iii,:) = [loci.x, loci.y];
-%             end
-%         end
-% 
-%         % Generate the locations of all turbines
-%         if strucObs.tune.est || strucObs.measPw
-%             turbLocArray = zeros(Wp.turbine.N,2);
-%             for iii = 1:Wp.turbine.N
-%                 turbLocArray(iii,:) = [Wp.turbine.Crx(iii),Wp.turbine.Cry(iii)];
-%             end
-%         end
-% 
-%         % Generate the locations of all outputs
-%         outputLocArray = [];
-%         if strucObs.measFlow
-%             outputLocArray = [outputLocArray; stateLocArray(strucObs.obs_array,:)];
-%         end
-%         if strucObs.measPw
-%             outputLocArray = [outputLocArray; turbLocArray];
-%         end
-%         if strucObs.stateEst
-%             rho_locl.cross = sparse(strucObs.size_output,strucObs.size_output);
-%             for iii = 1:strucObs.size_output % Loop over all default states
-%                 loc1 = stateLocArray(iii,:);
-%                 for jjj = 1:length(strucObs.obs_array) % Loop over all measurements
-%                     loc2 = outputLocArray(jjj,:);
-%                     dx = sqrt(sum((loc1-loc2).^2)); % displacement between state and output
-%                     if dx <= strucObs.l_locl
-%                         strucObs.rho_locl(iii,jjj) = 1;
-%                     else
-%                         strucObs.rho_locl(iii,jjj) = 0;
-%                     end;
-%                 end
-%             end
-%             clear iii jjj dx loc1 loc2
-%         else
-%             rho_locl.cross = [];
-%         end
-%     end
-%     factor = strucObs.rho_locl;
-
     strucObs.nrobs    = length(strucObs.obs_array); % number of state measurements
     strucObs.M        = strucObs.nrobs+strucObs.measPw*Wp.turbine.N; % total length of measurements
     if sol_in.k == 1
-%         options.savePath
         strucObs.l_locl
         [ strucObs ] = WFObs_o_exkf_localization( Wp,strucObs );
-%         options.savePath
         save([options.savePath '/workspace0.mat'],'strucObs');
     end
 
-% Pk = strucObs.autoState_corrfactor.* Pk;
 end
-Pf = Fk*Pk*Fk' + strucObs.Q_k;  % Covariance matrix P for x(k) knowing y(k-1)
+if strucObs.localize && (strucObs.localizeType == 3)
+    Pk          = strucObs.autoState_corrfactor.* Pk; 
+end
+
+if ( strcmp(upper(strucObs.KF),'DYNAMIC') )...
+        ||( sol_in.k<=2 )...
+        ||(( sol_array2(sol_in.k-1).sPk - sol_array2(sol_in.k-2).sPk )>=1 )
+    Pf = Fk*Pk*Fk' + strucObs.Q_k;  % Covariance matrix P for x(k) knowing y(k-1)
+end
     
+if strucObs.localize && (strucObs.localizeType == 4)
+    Pf          = strucObs.autoState_corrfactor.* Pf; 
+end
+
 % ExKF analysis update
 sol_out     = sol_in; % Copy previous solution before updating x
 
-if strucObs.localize && (strucObs.localizeType == 1)
-    Kgain       = strucObs.cross_corrfactor.* Pf(:,strucObs.obs_array)...
-                  *pinv(strucObs.auto_corrfactor .* Pf(strucObs.obs_array,...
-                  strucObs.obs_array)+strucObs.R_k); % Kalman gain           
-else
-    Kgain       = Pf(:,strucObs.obs_array)*pinv(Pf(strucObs.obs_array,...
-                  strucObs.obs_array)+strucObs.R_k); % Kalman gain           
+if ( strcmp(upper(strucObs.KF),'DYNAMIC') )...
+        ||( sol_in.k<=2 )...
+        ||(( sol_array2(sol_in.k-1).sPk - sol_array2(sol_in.k-2).sPk )>=1 )
+    if strucObs.localize && (strucObs.localizeType == 1)
+        Kgain       = strucObs.cross_corrfactor.* Pf(:,strucObs.obs_array)...
+                      *pinv(strucObs.auto_corrfactor .* Pf(strucObs.obs_array,...
+                      strucObs.obs_array)+strucObs.R_k); % Kalman gain           
+    else
+        Kgain       = Pf(:,strucObs.obs_array)*pinv(Pf(strucObs.obs_array,...
+                      strucObs.obs_array)+strucObs.R_k); % Kalman gain           
+    end
+else 
+    Kgain = sol_array2(sol_in.k-1).K;
 end
 
 sol_out.x   = solf.x + Kgain*(measuredData.sol(strucObs.obs_array)...
@@ -145,26 +114,26 @@ if strucObs.localize && (strucObs.localizeType == 2)
     Pf          = strucObs.autoState_corrfactor.* Pf; 
 end
 
-strucObs.Pk = (eye(size(Pf))-Kgain*strucObs.Htt)*Pf;  % State covariance matrix
+if ( strcmp(upper(strucObs.KF),'DYNAMIC') )...
+        ||( sol_in.k<=2 )...
+        ||(( sol_array2(sol_in.k-1).sPk - sol_array2(sol_in.k-2).sPk )>=1 )
+    strucObs.Pk = (eye(size(Pf))-Kgain*strucObs.Htt)*Pf;  % State covariance matrix
+end
 
-% Pk1k1   = strucObs.Pk;
-% R       = strucObs.R_k;
-% Q       = strucObs.Q_k; 
-% y       = measuredData.sol(strucObs.obs_array); 
-% C       = strucObs.Htt; 
-% n       = length(Fk);
-% 
-% xkk1    = solf.x;
-% Pkk1    = Fk*Pk1k1*Fk' + Q;
-% dy      = y - C*xkk1;
-% Pyy     = R + C*Pkk1*C';
-% Pxy     = Pkk1*C';
-% K       = Pxy*inv(Pyy);
-% xkk     = xkk1 + K*dy;
-% Pkk     = ( eye(n,n) - K*C )*Pkk1;
-% 
-% sol_out.x   = xkk;
-% strucObs.Pk = Pkk;
+sol_out.K = Kgain;
+
+% tmp1 = (abs(eig(Pf)));
+% sol_out.Pkk1 = tmp1;
+% % plot(sol_out.k,tmp1,'o'),hold on;
+% stmp1 = max(abs(eig(Pf)));
+% sol_out.sPkk1 = stmp1;
+
+Pk = strucObs.Pk;
+tmp2 = (abs(eig(Pk)));
+% plot(sol_out.k,tmp2,'*'),hold on;
+sol_out.Pk = tmp2;
+stmp2 = max(abs(eig(Pk)));
+sol_out.sPk = stmp2;
 
 % Export new solution from estimation
 [sol_out,~]  = MapSolution(Wp,sol_out,Inf,options); % Map solution to flowfields

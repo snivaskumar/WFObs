@@ -8,13 +8,17 @@ N=600;  % the length of the simulation
 n = 2;
 
 % system matrixes
-A=[0.9512  0;
-     0.0476  0.9512];
+% A=[0.9512  0;
+%    0.0476  0.9512];
+A=[0.98  0;
+   0.0076  0.9912];
 B=[ 0.0975;
     0.0024];
-Bw=[    0.0975  0;
-        0.0024  0.0975];
-C = [0 1];
+Bw=[0.0975  0;
+    0.0024  0.0975];
+% C = [0 1];
+C = [1 0];
+rank(obsv(A,C))
 Cd = [0 1; 1 0];
 Dw=[0 0.5];
 D=0;
@@ -64,12 +68,12 @@ u1=[u w vprim];
 f = @(x,u,w) (A*x + B*u + Bw*w);
 g = @(x,u,w,v) (C*x + D*u + Dw*w + v);
 
-x = zeros(2,600);
-x(:,1) = x01;
-for k = 1:N
-    x(:,k+1) = f(x(:,k),u(k),w(k,:)');
-    y(:,k)   = g(x(:,k),u(k),w(k,:)',vprim(k,:)');
-end
+% x = zeros(2,600);
+% x(:,1) = x01;
+% for k = 1:N
+%     x(:,k+1) = f(x(:,k),u(k),w(k,:)');
+%     y(:,k)   = g(x(:,k),u(k),w(k,:)',vprim(k,:)');
+% end
 
 %% Kalman Filter 
 
@@ -79,11 +83,17 @@ u1      = u1';
 ynoisy  = ynoisy';
 xkk     = zeros(2,600);
 xkk(:,1)= xk1k1;
+% tmp     = cell(N,1); 
+tmp1     = []; 
+tmp2     = []; 
 for k = 1:N
     xkk1        = A*xk1k1 + B1*u1(:,k);
     Pkk1        = A*Pk1k1*A' + Q;
     
     dy          = ynoisy(:,k) - C*xkk1;
+    
+    dyy(k)      = dy;
+    
     Pyy         = R + C*Pkk1*C';
     Pxy         = Pkk1*C';
     K           = Pxy*inv(Pyy);
@@ -91,7 +101,23 @@ for k = 1:N
     Pk1k1       = ( eye(n,n) - K*C )*Pkk1;
     
     xkk(:,k)    = xk1k1;
+    
+    stmp1(k)      = max(abs(eig(Pkk1)));
+    stmp2(k)      = max(abs(eig(Pk1k1)));
+    
+    tmp1(k)      = max(diag(Pkk1));
+    tmp2(k)      = max(diag(Pk1k1));
 end
+
+XCsrcf=xcorr(dyy);
+figure, plot(-floor(length(XCsrcf)/2):floor(length(XCsrcf)/2),XCsrcf,'LineWidth',2)
+xlabel('Lag (\tau)')
+axis([-100 100 -1 15])
+hold on,
+[Xps_srcf,om]=pwelch(dyy,128,[],[],1/Ts);
+figure, semilogy(om,Xps_srcf,'LineWidth',2);
+xlabel('\omega (Hz)')
+set(gca,'FontSize',18)
 
 figure
 subplot(211)
